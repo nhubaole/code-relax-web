@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.gutter-vertical:hover {
+    background-color: #2A2B2D;
+    cursor: row-resize /* Blue color when hovered */
+}
+    
+.gutter.gutter-horizontal:hover {
+    background-color: #2A2B2D;
+    cursor: col-resize /* Blue color when hovered */
+}
+        
