@@ -13,7 +13,6 @@ const Workspace = (prop: WorkspaceProps) => {
   const { width, height } = useWindowSize();
   const [success, setSuccess] = useState(false);
   const [solved, setSolved] = useState(false);
-  const [isHoveringGutter, setIsHoveringGutter] = useState(false);
 
   return (
     <Split
@@ -24,7 +23,7 @@ const Workspace = (prop: WorkspaceProps) => {
       gutterAlign="center"
       
     >
-      <ProblemDescription problemId="1" _solved={solved} />
+      <ProblemDescription />
       <div className="">
         <Playground
           problem={prop.problem}

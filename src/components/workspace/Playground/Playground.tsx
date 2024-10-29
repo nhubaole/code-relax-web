@@ -7,8 +7,8 @@ import { python } from "@codemirror/lang-python";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
-import { ProblemDetail } from "../ProblemDescription/ProblemDescription";
 import EditorFooter from "./EditorFooter";
+import { autocompletion } from '@codemirror/autocomplete';
 
 type PlaygroundProps = {
   problem: any;
@@ -184,8 +184,8 @@ const Playground = (prop: PlaygroundProps) => {
     } catch (error: any) {}
   };
   return (
-    <div className="flex flex-col rounded-lg relative overflow-x-hidden">
-      <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF] overflow-x-hidden">
+    <div className="flex flex-col rounded-lg relative">
+      <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
           className={
             " rounded-t-[5px] px-5 py-[10px] text-base font-bold text-green-300 cursor-pointer"
@@ -214,7 +214,7 @@ const Playground = (prop: PlaygroundProps) => {
             value={userCode}
             theme={vscodeDark}
             onChange={onChange}
-            extensions={[languageMode]}
+            extensions={[languageMode, autocompletion()]}
             style={{ fontSize: settings.fontSize }}
           />
         </div>
