@@ -11,4 +11,16 @@
     background-color: #2A2B2D;
     cursor: col-resize /* Blue color when hovered */
 }
-        
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px; 
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5); 
+    border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent; 
+}
