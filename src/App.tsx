@@ -1,11 +1,14 @@
-import Home from './components/home/Home';
-import Workspace from './components/workspace/Workspace';
+import Workspace from "./components/workspace/Workspace";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { LoaderProvider } from "./context/LoaderContext";
 
 function App() {
-
   return (
-    // <Home/>
-    <Workspace problem={undefined}/>
+    <LoaderProvider>
+      <Workspace problem={undefined} />
+      <ToastContainer />
+    </LoaderProvider>
   );
 }
 

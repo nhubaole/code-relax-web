@@ -1,78 +1,48 @@
-import { useEffect, useState } from "react";
-import { AiOutlineLoading3Quarters, AiFillStar } from "react-icons/ai";
+import { AiFillStar } from "react-icons/ai";
 import { TiStarOutline } from "react-icons/ti";
-import { MediumTag, ProblemTag, SolvedTag } from "../../../ui/tag";
+import {
+  EasyTag,
+  HardTag,
+  MediumTag,
+  ProblemTag,
+  SolvedTag,
+} from "../../../ui/tag";
 import tag from "../../../assets/tag.svg";
 import disscussion from "../../../assets/disscussion.svg";
 import down from "../../../assets/direction_down.svg";
 import up from "../../../assets/up.svg";
+import { testCaseFormatter } from "../../../utils/formatter";
+import { ProblemRes, TestCase } from "../../../models/problem";
 type ProblemDescriptionProps = {
-  problemId: string;
+  testCases: TestCase[];
+  problem: ProblemRes;
   _solved: boolean;
 };
 
-const ProblemDescription = () => {
-  // const [problem, setProblem] = useState<ProblemDetail | null>(null);
-  // const [loading, setLoading] = useState<boolean>(true);
-  // const [starred, setStarred] = useState(false);
-  // const [updating, setUpdating] = useState(false);
+const ProblemDescription = (prop: ProblemDescriptionProps) => {
+  
 
-  // useEffect(() => {
-  //   const fetchProblemDetails = async () => {
-  //     try {
-  //       // setLoading(true);
-  //       const response = await fetch(
-  //         `http://localhost:5107/api/Problems/GetProblemDetail?problemId=1}`,
-  //         {
-  //           method: "GET",
-  //           mode: "cors",
-  //           headers: {
-  //             Accept: "application/json, text/plain",
-  //             "Content-Type": "application/json;charset=UTF-8",
-  //           },
-  //         }
-  //       );
-  //       const data = await response.json();
-  //       setProblem(data.data);
-  //     } catch (error) {
-  //       console.log("Failed to fetch problem details");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  // const handleLike = async () => {
+  //   // Handle like functionality here
+  // };
 
-  //   fetchProblemDetails();
-  // }, [problemId]);
+  // const handleDislike = async () => {
+  //   // Handle dislike functionality here
+  // };
 
-  const handleLike = async () => {
-    // Handle like functionality here
-  };
-
-  const handleDislike = async () => {
-    // Handle dislike functionality here
-  };
-
-  const handleStar = async () => {
-    // Handle star functionality here
-  };
+  // const handleStar = async () => {
+  //   // Handle star functionality here
+  // };
+  const varfalse = false;
 
   const tags = ["Dynamic Programing", "Array"];
-  const testCases = [
-    {
-      id: 1,
-      input: "nums = [0, 1, 2, 3], target = 9",
-      output: "[0, 1]",
-    },
-    {
-      id: 2,
-      input: "nums = [3, 2, 4], target = 6",
-      output: "[1, 2]",
-    },
-  ];
-  const problem = {
-    explaination:
-      "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.",
-  };
+  const testCasesRes = testCaseFormatter(prop.testCases);
+  const acceptanceRate =
+    prop.problem.numOfSubmission === 0
+      ? 0
+      : prop.problem.numOfAcceptance / prop.problem.numOfSubmission;
+
+
   return (
     <div className="bg-[#1E1E1E] rounded-lg">
       {/* TAB */}
@@ -90,12 +60,18 @@ const ProblemDescription = () => {
         <div className="px-5">
           {/* Problem heading */}
           <div className="break-all">
-            <div className="flex space-x-4 items-center">
+            <div className="flex space-x-4 items-center justify-between">
               <div className="flex mr-32 text-[#FFF] space-x-3">
-                <MediumTag />
-                <h1 className="text-2xl font-bold">Integer To Roman</h1>
+                {prop.problem.difficulty === 1 ? (
+                  <EasyTag />
+                ) : prop.problem.difficulty === 2 ? (
+                  <MediumTag />
+                ) : (
+                  <HardTag />
+                )}
+                <h1 className="text-2xl font-bold">{prop.problem?.title}</h1>
               </div>
-              <SolvedTag />
+              {prop._solved && <SolvedTag />}
             </div>
             <div className="flex mt-4 items-center space-x-2">
               <img src={tag} alt="" />
@@ -105,10 +81,7 @@ const ProblemDescription = () => {
               ))}
             </div>
             <div className="flex items-center mt-3">
-              <div
-                className="flex space-x-1 cursor-pointer rounded p-[3px] text-xl transition-colors duration-200 text-[#FFF]"
-                onClick={handleStar}
-              >
+              <div className="flex space-x-1 cursor-pointer rounded p-[3px] text-xl transition-colors duration-200 text-[#FFF]">
                 {[...Array(5)].map((_, index) => (
                   <TiStarOutline key={index} className="text-[#FFF]" />
                 ))}
@@ -116,16 +89,17 @@ const ProblemDescription = () => {
             </div>
 
             {/* Problem Statement(paragraphs) */}
-            <div className="text-[#FFF] mt-4 whitespace-normal break-words">
-              <p>{problem.explaination}</p>
-            </div>
+            <div
+              className="text-[#FFF] mt-4 whitespace-normal break-words"
+              dangerouslySetInnerHTML={{ __html: prop.problem.explaination }}
+            ></div>
 
             {/* Examples */}
             <div className="mt-4">
-              {testCases.map((example) => (
+              {testCasesRes.map((example, index) => (
                 <div className="mt-5" key={example.id}>
                   <p className="font-bold text-green-300">
-                    Example {example.id}:
+                    Example {index + 1}:
                   </p>
                   <div className="text-gray bg-blacklight space-y-3 mt-3 px-3 py-2 rounded-lg">
                     <pre className="whitespace-pre-wrap break-words">
@@ -145,17 +119,21 @@ const ProblemDescription = () => {
               <div className="flex justify-between text-start">
                 <div>
                   <p className="text-purple-300 font-medium">ACCEPTED:</p>
-                  <p className="font-bold text-[#FFF]">14.7M</p>
+                  <p className="font-bold text-[#FFF]">
+                    {prop.problem?.numOfAcceptance}
+                  </p>
                 </div>
                 <div>
                   <p className="text-purple-300 font-medium">SUBMISSIONS:</p>
-                  <p className="font-bold text-[#FFF]">27.4M</p>
+                  <p className="font-bold text-[#FFF]">
+                    {prop.problem?.numOfSubmission}
+                  </p>
                 </div>
                 <div>
                   <p className="text-purple-300 font-medium">
                     ACCEPTANCE RATE:
                   </p>
-                  <p className="font-bold text-[#FFF]">53.9%</p>
+                  <p className="font-bold text-[#FFF]">{acceptanceRate}</p>
                 </div>
               </div>
 
@@ -165,7 +143,13 @@ const ProblemDescription = () => {
                   <img src={disscussion} alt="" />
                   <span className="font-bold">DISCUSSION</span>
                 </div>
-                <span>{false ? <img src={up} alt="" /> : <img src={down} alt="" /> }</span>
+                <span>
+                  {varfalse ? (
+                    <img src={up} alt="" />
+                  ) : (
+                    <img src={down} alt="" />
+                  )}
+                </span>
               </div>
               {
                 // <div className="p-4 bg-[#333] rounded-b-lg">
@@ -180,7 +164,13 @@ const ProblemDescription = () => {
                   <AiFillStar className="text-yellow-500 text-xl" />
                   <span className="font-bold text-[#FFF]">4.2 RATINGS</span>
                 </div>
-                <span>{false ? <img src={up} alt="" /> : <img src={down} alt="" /> }</span>
+                <span>
+                  {varfalse ? (
+                    <img src={up} alt="" />
+                  ) : (
+                    <img src={down} alt="" />
+                  )}
+                </span>
               </div>
               {
                 // <div className="p-4 bg-[#333] rounded-b-lg">

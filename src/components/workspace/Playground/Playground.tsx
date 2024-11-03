@@ -8,12 +8,19 @@ import useLocalStorage from "../../../hooks/useLocalStorage";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import EditorFooter from "./EditorFooter";
-import { autocompletion } from '@codemirror/autocomplete';
+import { autocompletion } from "@codemirror/autocomplete";
+import { ProblemRes, SubmitReq, TestCase } from "../../../models/problem";
+import { testCaseFormatter } from "../../../utils/formatter";
+import { generateInitialCode } from "../../../utils/helper";
+import ProblemService from "../../../services/ProblemService";
+import { toast } from "react-toastify";
+import { useLoader } from "../../../context/LoaderContext";
 
 type PlaygroundProps = {
-  problem: any;
+  problem: ProblemRes;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setSolved: React.Dispatch<React.SetStateAction<boolean>>;
+  testCases: TestCase[];
 };
 
 export interface ISettings {
@@ -24,11 +31,12 @@ export interface ISettings {
 
 const Playground = (prop: PlaygroundProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState("C++");
-  const [activeTestCaseId, setActiveTestCaseId] = useState<number>(0);
-  const [problemDetail, setProblem] = useState<ProblemDetail | null>(null);
-
-  const [user, setUser] = useState<any>();
-  const [fontSize, setFontSize] = useLocalStorage("lcc-fontSize", "14px");
+  const [activeTestCaseId, setActiveTestCaseId] = useState<number>(
+    prop.testCases[0].id
+  );
+  const loader = useLoader();
+  console.log(loader);
+  const [fontSize] = useLocalStorage("lcc-fontSize", "14px");
 
   const [settings, setSettings] = useState<ISettings>({
     fontSize: fontSize,
@@ -37,63 +45,21 @@ const Playground = (prop: PlaygroundProps) => {
   });
 
   const [userCode, setUserCode] = useState<string>("");
+  const testCasesRes = testCaseFormatter(prop.testCases);
+  const activeTestCase = testCasesRes.find(
+    (testCase) => testCase.id === activeTestCaseId
+  );
 
   useEffect(() => {
-    const fetchProblemDetails = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5107/api/Problems/GetProblemDetail?problemId=1}`,
-          {
-            method: "GET",
-            mode: "cors",
-            headers: {
-              Accept: "application/json, text/plain",
-              "Content-Type": "application/json;charset=UTF-8",
-            },
-          }
-        );
-        const data = await response.json();
-        setProblem(data.data);
-      } catch (error) {}
-    };
-
-    fetchProblemDetails();
-  }, []);
-  let initialCode;
-
-  useEffect(() => {
-    if (problemDetail) {
-      if (problemDetail.returnType == "int") {
-        switch (selectedLanguage) {
-          case "Python":
-            initialCode = `def ${problemDetail.functionName}():`;
-            break;
-          case "Java":
-            initialCode = `public static int ${problemDetail.functionName}() {}`;
-            break;
-          case "C++":
-          default:
-            initialCode = `int ${problemDetail.functionName}() {}`;
-        }
-        setUserCode(initialCode);
-      } else if (problemDetail.returnType == "string") {
-        switch (selectedLanguage) {
-          case "Python":
-            initialCode = `def ${problemDetail.functionName}():`;
-            break;
-          case "Java":
-            initialCode = `public static String ${problemDetail.functionName}() {}`;
-            break;
-          case "C++":
-          default:
-            initialCode = `string ${problemDetail.functionName}() {}`;
-        }
-        setUserCode(initialCode);
-      }
+    if (prop.problem) {
+      const initialCode = generateInitialCode(
+        prop.problem.functionName,
+        prop.problem.returnType,
+        selectedLanguage
+      );
+      setUserCode(initialCode);
     }
-  }, [selectedLanguage, problemDetail]);
-  const API_URL = "http://localhost:5107/api/Judge/Submit";
-  const CREATE_API_URL = "http://localhost:5107/api/Submissions";
+  }, [selectedLanguage, prop.problem]);
 
   const onChange = (value: string) => {
     setUserCode(value);
@@ -116,72 +82,25 @@ const Playground = (prop: PlaygroundProps) => {
     default:
       languageMode = cpp();
   }
-  const [res, setRes] = useState();
   const handleSubmit = async () => {
-    if (!user) {
-      console.log("errr");
-    }
-    try {
-      const data = {
-        problemId: prop.problem.problemId,
-        sourceCode: userCode,
-        language: selectedLanguage,
-      };
-      var casesPass = 1;
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(data),
-        mode: "cors",
-        headers: {
-          Accept: "application/json, text/plain",
-          "Content-Type": "application/json;charset=UTF-8",
-        },
-      });
-      if (!res.ok) {
-      }
-      const result = await res.json();
+    loader.start();
+    const problemService = new ProblemService();
+    const req: SubmitReq = {
+      problemID: prop.problem.id,
+      sourceCode: userCode,
+      language: selectedLanguage,
+    };
+    const response = await problemService.submit(req);
+    const data = response.data;
 
-      if (result.statusCode == 200) {
-        setRes(result.data.output);
-        const createData = {
-          problemId: prop.problem.problemId,
-          language: selectedLanguage,
-          isAccepted: true,
-          numCasesPassed: problemDetail?.testCases.length,
-        };
-        await fetch(CREATE_API_URL, {
-          method: "POST",
-          body: JSON.stringify(createData),
-          mode: "cors",
-          headers: {
-            Authorization: `Bearer ${casesPass}`,
-            "Content-Type": "application/json;charset=UTF-8",
-            Accept: "application/json, text/plain",
-          },
-        });
-      } else if (result.statusCode == 204) {
-        setRes(result.data.output);
-        const createData = {
-          problemId: prop.problem.problemId,
-          language: selectedLanguage,
-          isAccepted: false,
-          numCasesPassed: Number(problemDetail?.testCases.length) - 1,
-        };
-        await fetch(CREATE_API_URL, {
-          method: "POST",
-          body: JSON.stringify(createData),
-          mode: "cors",
-          headers: {
-            Authorization: `Bearer ${createData}`,
-            Accept: "application/json, text/plain",
-            "Content-Type": "application/json;charset=UTF-8",
-          },
-        });
-      } else if (result.statusCode == 400) {
-        setRes(result.data.output);
-      } else if (result.statusCode == 500) {
-      }
-    } catch (error: any) {}
+    if (data.statusCode === 200) {
+      loader.stop();
+      toast.success("Congratulation, all testcases passed!");
+    }
+    if (data.statusCode !== 200) {
+      loader.stop();
+      toast.error(data.message);
+    }
   };
   return (
     <div className="flex flex-col rounded-lg relative">
@@ -208,7 +127,6 @@ const Playground = (prop: PlaygroundProps) => {
         gutterSize={10}
         cursor="row-resize"
       >
-        
         <div className="w-full overflow-auto  bg-[#1E1E1E]">
           <CodeMirror
             value={userCode}
@@ -218,7 +136,7 @@ const Playground = (prop: PlaygroundProps) => {
             style={{ fontSize: settings.fontSize }}
           />
         </div>
-        
+
         <div className="w-full overflow-auto bg-[#1E1E1E]">
           <div className="flex h-10 items-center rounded-t-lg space-x-6 bg-blacklight">
             <div className="relative flex h-full flex-col justify-center cursor-pointer">
@@ -229,25 +147,25 @@ const Playground = (prop: PlaygroundProps) => {
           </div>
 
           <div className="flex p-3 border-b border-blacklight">
-            {[1, 2, 3].map((index) => (
+            {testCasesRes.map((value, index) => (
               <div
                 className={"mr-2 items-start mt-2 "}
-                key={String(index)}
+                key={index}
                 onClick={() => {
-                  if (index == 0) setActiveTestCaseId(index);
+                  setActiveTestCaseId(value.id);
                 }}
               >
                 <div className="flex flex-wrap items-center gap-y-4 ">
                   <div
                     className={`font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap
                       ${
-                        1 === index
+                        activeTestCaseId === value.id
                           ? "text-black bg-[#FFF]"
                           : "text-gray bg-blacklight"
                       }
                     `}
                   >
-                    Case {index}
+                    Case {index + 1}
                   </div>
                 </div>
               </div>
@@ -255,20 +173,18 @@ const Playground = (prop: PlaygroundProps) => {
           </div>
 
           <div className="my-4 px-4">
-            <p className="text-sm font-medium mt-4 text-gray">
-              Input = {" "}
-            </p>
+            <p className="text-sm font-medium mt-4 text-gray">Input = </p>
             <div className=" cursor-text font-medium rounded-lg px-3 py-[10px] bg-blacklight text-gray mt-2">
-              nums = [1,2,3,4], target = 9
+              {activeTestCase?.input}
             </div>
             <p className="text-sm font-medium mt-4 text-gray">Output:</p>
             <div className="w-auto cursor-text rounded-lg px-3 py-[10px] bg-blacklight text-gray mt-2">
-              [2, 7, 11, 25]
+              {activeTestCase?.output}
             </div>
           </div>
         </div>
       </Split>
-      <EditorFooter handleSubmit={handleSubmit}/>
+      <EditorFooter handleSubmit={handleSubmit} />
     </div>
   );
 };
