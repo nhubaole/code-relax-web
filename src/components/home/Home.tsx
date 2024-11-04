@@ -10,7 +10,7 @@ const Home = () => {
         alt="Background"
       />
 
-      <div className="absolute inset-0 flex flex-col -top-1/3 justify-center space-y-8">
+      <div className="absolute inset-0 flex flex-col justify-center space-y-8 -top-1/3">
         <h1 className="font-extrabold text-7xl text-center text-[#FFFFFF]">
             <span className="text-green-300">Learning</span> to <span className="text-green-300">code</span> <br />
           doesn’t have to be painful.
@@ -19,9 +19,9 @@ const Home = () => {
          in the browser with multi-language support and intelligent features.</p>
       </div>
 
-      <div className="absolute top-0 left-0 w-full">
+      {/* <div className="absolute top-0 left-0 w-full">
         <Navbar />
-      </div>
+      </div> */}
     </div>   
   );
 };
