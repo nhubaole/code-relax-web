@@ -140,24 +140,26 @@ const SearchTag = ({ content, onSelect, isSelected }: {
 
 
 const Problems = () => {
-    const [selectedTag, setSelectedTag] = useState('');
-    const [selectedStatus, setSelectedStatus] = useState('');
-    const [selectedDifficulty, setSelectedDifficulty] = useState('');
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
 
     const handleTagSelect = (content: string) => {
-        setSelectedTag(content);
-        const inputElement = document.getElementById('_search') as HTMLInputElement; // tìm input
-        if (inputElement) {
-            inputElement.value = content; 
-        }
-    };    
+        setSelectedTags(prev => {
+            if (prev.includes(content)) {
+                return prev.filter(tag => tag !== content);
+            } else {
+                return [...prev, content];
+            }
+        });
+    };
 
     const handleCheckboxChange = (value: string) => {
-        setSelectedStatus(value);
+        setSelectedStatus(prev => (prev === value ? null : value));
     };
 
     const handleDifficultyChange = (value: string) => {
-        setSelectedDifficulty(value);
+        setSelectedDifficulty(prev => (prev === value ? null : value));
     };
 
     return (
@@ -271,7 +273,7 @@ const Problems = () => {
                                             <SearchTag 
                                                 content={tag} 
                                                 onSelect={handleTagSelect} 
-                                                isSelected={selectedTag === tag} 
+                                                isSelected={selectedTags.includes(tag)} 
                                             />
                                         </div>
                                     ))}
