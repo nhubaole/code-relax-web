@@ -9,10 +9,9 @@ const ItemPoint = ({
     return (
         <div className="flex w-full">
             <img src={star} alt="Icon" className="w-4 h-4 mt-0.5 ml-1.5" />             
-            <div className="flex-none w-1/6 ml-2 text-left text-yellow-300">{points}</div>   
-            <div className="flex-1  text-left text-[#FFFFFF]">{problem}</div>   
-            <div className="text-sm flex-none w-1/4 text-right text-[#FFFFFF]">{time}</div>   
-                 
+            <span className="flex-none w-1/6 ml-2 text-left text-yellow-300">{points}</span>   
+            <span className="flex-1  text-left text-[#FFFFFF]">{problem}</span>   
+            <span className="text-sm flex-none w-1/4 text-right text-[#FFFFFF]">{time}</span>  
         </div>   
     );
 };
@@ -38,8 +37,8 @@ const DivPoints = () => {
     return (
         <div className="px-10 text-white">
             <div className="flex mb-4">
-                <div className="font-bold text-left text-[#FFFFFF] flex-initial">My Point:</div> 
-                <div className="flex-initial ml-4 font-bold text-left text-yellow-500">1010</div>
+                <h1 className="text-left text-[#FFFFFF] flex-initial">My Point:</h1> 
+                <h1 className="flex-initial ml-4 text-left text-yellow-500">1010</h1>
                 <img src={star} alt="Icon" className="w-4 h-4 mt-0.5 ml-1.5" /> 
             </div>              
 

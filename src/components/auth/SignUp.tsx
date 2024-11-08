@@ -1,13 +1,12 @@
-import Navbar from "../home/Navbar";
 import home from "../../assets/home.png";
-import PasswordInput from "./inputpassword";
+import PasswordInput from "./InputPassword";
 import { Link } from "react-router-dom";
 
 const SignUp = () => {
   return (
     <div className="relative">
         <img
-            className="w-full h-[800px] object-cover"
+            className="object-cover w-full h-screen"
             src={home}
             alt="Background"
         />
@@ -23,20 +22,14 @@ const SignUp = () => {
                     placeholder="Email address"
                     required
                 />
-
-                <PasswordInput 
-                    placeholder="Password"  />
-
-                <PasswordInput 
-                    placeholder="Confirm password"  />
-                
+                <PasswordInput placeholder="Password"  />
+                <PasswordInput placeholder="Confirm password"  />
                 <input
                     type="text"
                     className="w-full px-4 py-3 bg-[#FFFFFF] bg-opacity-0 border border-[#FFFFFF] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#FFFFFF] placeholder-[#FFFFFF] text-[#FFFFFF]"
                     placeholder="Display name"
                     required
                 />
-
                 <div></div>
                 <button
                     type="submit"
@@ -48,13 +41,9 @@ const SignUp = () => {
             <div className="flex mt-3 ">
                 <p className="text-[#FFFFFF]  cursor-pointer flex-1 text-right mr-3">Have an account?</p>
                 <Link to="/login" className="text-[#FFFFFF] font-bold hover:underline cursor-pointer flex-none w-32 text-left">Log In</Link>
-           </div>
+            </div>
             
             </div>
-        </div>
-    
-        <div className="absolute top-0 left-0 w-full">
-            <Navbar />
         </div>
     </div>   
   );

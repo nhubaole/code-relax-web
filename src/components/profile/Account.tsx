@@ -15,11 +15,11 @@ const DivAccount = () => {
 
     return (
         <div className="px-10 text-white">
-            <div className="font-bold text-left text-[#FFFFFF] mb-4 ">Account Information</div>                  
+            <h1 className="text-left text-[#FFFFFF] mb-4 ">Account Information</h1>                  
 
-            <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col py-4 space-y-3">
+            <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col space-y-3">
                 <div className="flex flex-1 p-1.5">
-                    <div className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Display name</div>   
+                    <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Display name</span>   
                     <input
                         id='_name'
                         type="text"
@@ -33,7 +33,7 @@ const DivAccount = () => {
                 <hr className="border-t border-green-700 border-opacity-50 my-7" />
 
                 <div className="flex flex-1 p-1.5 w-15">
-                    <div className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Email</div>
+                    <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Email</span>
                     <input
                         id='_email'
                         type="text"
@@ -47,7 +47,7 @@ const DivAccount = () => {
                 <hr className="border-t border-green-700 border-opacity-50 my-7" />
 
                 <div className="flex flex-1 p-1.5 w-15">
-                    <div className="flex-none text-sm w-96 text-left text-[#FFFFFF]">Password</div>
+                    <span className="flex-none text-sm w-96 text-left text-[#FFFFFF]">Password</span>
                     <input
                         id='_password'
                         type="text"
@@ -62,12 +62,12 @@ const DivAccount = () => {
                 
             </div>             
 
-            <div className="font-bold text-left text-[#FFFFFF] mb-4 mt-8">Social Account</div>
+            <h1 className="text-left text-[#FFFFFF] mb-4 mt-8">Social Account</h1>
             
             <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col py-4 space-y-3">
                 <div className="flex flex-1 py-1.5 px-4">
                     <img src={google} alt="Icon" className="w-6 h-6 mr-2" /> 
-                    <div className="mt-0.5 flex-none text-sm w-96 text-left text-[#FFFFFF]">Google</div>   
+                    <span className="mt-0.5 flex-none text-sm w-96 text-left text-[#FFFFFF]">Google</span>   
                     <input
                         id='_google'
                         type="text"
@@ -82,7 +82,7 @@ const DivAccount = () => {
 
                 <div className="flex flex-1 py-1.5 px-4 w-15">
                     <img src={github} alt="Icon" className="w-6 h-6 mr-2" /> 
-                    <div className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Github</div>
+                    <span className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Github</span>
                     <input
                         id='_github'
                         type="text"
@@ -97,7 +97,7 @@ const DivAccount = () => {
 
                 <div className="flex flex-1 py-1.5 px-4 w-15">
                     <img src={facebook} alt="Icon" className="w-6 h-6 mr-2" /> 
-                    <div className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Facebook</div>
+                    <span className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Facebook</span>
                     <input
                         id='_facebook'
                         type="text"
