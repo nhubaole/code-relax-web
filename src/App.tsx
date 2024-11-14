@@ -6,7 +6,7 @@ import { LoaderProvider } from "./context/LoaderContext";
 function App() {
   return (
     <LoaderProvider>
-      <Workspace problem={undefined} />
+      <Workspace problemId={1} />
       <ToastContainer />
     </LoaderProvider>
   );

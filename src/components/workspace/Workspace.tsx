@@ -70,7 +70,7 @@ const Workspace = (prop: WorkspaceProps) => {
           setSolved={setSolved}
         />
       ) : (
-        <p>Loading...</p> // Hoặc render một loading state khác
+        <p>Loading...</p> 
       )}
         {success && (
           <Confetti
