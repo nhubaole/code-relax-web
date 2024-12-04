@@ -14,7 +14,10 @@ import down from "../../../assets/direction_down.svg";
 import up from "../../../assets/up.svg";
 import { testCaseFormatter } from "../../../utils/formatter";
 import { ProblemRes, TestCase } from "../../../models/problem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { DiscussionRes } from "../../../models/discussion";
+import DiscussionService from "../../../services/DiscussionService";
+import { toast } from "react-toastify";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -27,6 +30,22 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
   const toggleDiscussion = () => setIsDiscussionOpen(!isDiscussionOpen);
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
+  const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
+  const [newDiscussion, setNewDiscussion] = useState("");
+
+  const [effects, setEffects] = useState({
+    bold: false,
+    italic: false,
+    code: false,
+    link: false,
+  });
+
+  const toggleEffect = (effect: keyof typeof effects) => {
+    setEffects((prev) => ({
+      ...prev,
+      [effect]: !prev[effect], // Đảo trạng thái của hiệu ứng được nhấn
+    }));
+  };
 
   const tags = ["Dynamic Programing", "Array"];
   const testCasesRes = testCaseFormatter(prop.testCases);
@@ -35,23 +54,58 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       ? 0
       : prop.problem.numOfAcceptance / prop.problem.numOfSubmission;
 
-  const discussions = [
-    {
-      id: 1,
-      username: "Vu Nguyen",
-      avatar:
-        "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?semt=ais_hybrid",
-      message:
-        "hi @channel, cụm database uat của postgresql 10.10.13.20 đã được chuyển qua host 10.10.13.127, ae đổi lại host cho các connection string cho các config của api/client, các trường hợp lỗi connection vui lòng báo cho dba để fix lỗi nha. thanks!",
-    },
-    {
-      id: 2,
-      username: "Giang",
-      avatar:
-        "https://w7.pngwing.com/pngs/4/736/png-transparent-female-avatar-girl-face-woman-user-flat-classy-users-icon-thumbnail.png",
-      message: "oki em nhờ API hỗ trợ",
-    },
-  ];
+  useEffect(() => {
+    const fetchdiscussion = async () => {
+      const discussionService = new DiscussionService();
+      const response = await discussionService.getByProblemID(prop.problem.id);
+      const data = response.data.data;
+      setDiscussions(data);
+    };
+    fetchdiscussion();
+  }, [prop.problem.id]);
+
+  const handleCreateDiscussion = async () => {
+    if (!newDiscussion.trim()) {
+      alert("Discussion content cannot be empty!");
+      return;
+    }
+
+    try {
+      const discussionService = new DiscussionService();
+
+      const createResponse = await discussionService.create({
+        content: newDiscussion,
+        type: "text",
+        userID: 3,
+        problemID: prop.problem.id,
+      });
+
+      if (createResponse.status === 201) {
+        const id = createResponse.data.data;
+
+        const getResponse = await discussionService.getByID(id);
+        if (getResponse.status === 200) {
+          const newDiscussionData = getResponse.data.data;
+
+          setDiscussions((prevDiscussions) => [
+            ...prevDiscussions,
+            newDiscussionData,
+          ]);
+
+          setNewDiscussion("");
+        } else {
+          toast.error("Failed to fetch discussion details. Please try again.");
+        }
+      } else {
+        toast.error("Failed to create discussion. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating discussion:", error);
+      toast.error(
+        "Error occurred while creating discussion. Please try again."
+      );
+    }
+  };
   const ratings = {
     overall: 4.5,
     totalReviews: 653,
@@ -67,7 +121,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const maxRatingCount = Math.max(...Object.values(ratings.breakdown));
   return (
     <div className="bg-[#1E1E1E] rounded-lg">
-      {/* TAB */}
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
           className={
@@ -80,7 +133,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
       <div className="flex px-0 py-4 h-[calc(100vh-94px)] overflow-y-auto">
         <div className="px-5">
-          {/* Problem heading */}
           <div className="break-all">
             <div className="flex space-x-4 items-center justify-between">
               <div className="flex mr-32 text-[#FFF] space-x-3">
@@ -110,13 +162,11 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
               </div>
             </div>
 
-            {/* Problem Statement(paragraphs) */}
             <div
               className="text-[#FFF] mt-4 whitespace-normal break-words"
               dangerouslySetInnerHTML={{ __html: prop.problem.explaination }}
             ></div>
 
-            {/* Examples */}
             <div className="mt-4">
               {testCasesRes.map((example, index) => (
                 <div className="mt-5" key={example.id}>
@@ -137,7 +187,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
             </div>
 
             <div className="mt-6 rounded-lg text-white ">
-              {/* Stats Section */}
               <div className="flex justify-between text-start">
                 <div>
                   <p className="text-purple-300 font-medium">ACCEPTED:</p>
@@ -159,7 +208,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                 </div>
               </div>
 
-              {/* Discussion Panel */}
               <div
                 className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${
                   isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
@@ -183,14 +231,58 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                   {/* Editor Section */}
                   <div className="bg-black p-3 rounded-lg mb-4 text-gray">
                     <div className="flex items-center space-x-5 mb-2 text-[#fff]">
-                      <BiBold className="cursor-pointer" />
-                      <BiItalic className="cursor-pointer" />
-                      <BiCode className="cursor-pointer" />
-                      <BiLink className="cursor-pointer" />
+                      <BiBold
+                        className={`cursor-pointer ${
+                          effects.bold ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("bold")}
+                      />
+                      <BiItalic
+                        className={`cursor-pointer ${
+                          effects.italic ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("italic")}
+                      />
+                      <BiCode
+                        className={`cursor-pointer ${
+                          effects.code ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("code")}
+                      />
+                      <BiLink
+                        className={`cursor-pointer ${
+                          effects.link ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("link")}
+                      />
                     </div>
                     <textarea
                       placeholder="Aa"
                       className="w-full bg-[#1E1E1E] text-gray-400 p-2 rounded-md outline-none resize-none"
+                      value={newDiscussion}
+                      onChange={(e) => {
+                        let content = e.target.value;
+                    
+                        if (effects.bold) {
+                          content = `**${content}**`; // Thêm hiệu ứng Bold
+                        }
+                    
+                        if (effects.italic) {
+                          content = `_${content}_`; // Thêm hiệu ứng Italic
+                        }
+                    
+                        if (effects.code) {
+                          content = `\`${content}\``; // Thêm hiệu ứng Code
+                        }
+                    
+                        setNewDiscussion(content);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleCreateDiscussion();
+                        }
+                      }}
                     ></textarea>
                   </div>
                   {discussions.map((discussion) => (
@@ -199,22 +291,21 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                       className="flex items-start space-x-4 my-4"
                     >
                       <img
-                        src={discussion.avatar}
+                        src={""}
                         alt="User"
                         className="w-8 h-8 rounded-full"
                       />
                       <div className="text-gray">
                         <p className="font-bold text-[#fff]">
-                          {discussion.username}
+                          {discussion.user?.displayName || "Anonymous"}
                         </p>
-                        <p>{discussion.message}</p>
+                        <p>{discussion.content}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* Ratings Panel */}
               <div
                 className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${
                   isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
@@ -223,7 +314,9 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
               >
                 <div className="flex items-center space-x-2">
                   <AiOutlineStar className="text-gray text-2xl" />
-                  <span className="font-bold text-[#FFF]">{ratings.overall} RATINGS</span>
+                  <span className="font-bold text-[#FFF]">
+                    {ratings.overall} RATINGS
+                  </span>
                 </div>
                 <span>
                   {isRatingsOpen ? (
@@ -248,7 +341,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                       </p>
                     </div>
 
-                    {/* Rating Breakdown */}
                     <div className="mt-4 flex-1 space-y-2">
                       {Object.entries(ratings.breakdown)
                         .sort((a, b) => Number(b[0]) - Number(a[0])) // Sort by star level descending

@@ -33,4 +33,14 @@ export default  class ProblemService {
         throw error;
       }
     }
+
+    async runCode(req: SubmitReq){
+      const url = PROBLEM_ENDPOINT + '/RunCode'
+      try {
+        const res = await apiClient.post(url, req)
+        return res;
+      } catch (error) {
+        throw error;
+      }
+    }
 }

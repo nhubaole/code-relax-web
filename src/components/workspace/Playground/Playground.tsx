@@ -91,13 +91,35 @@ const Playground = (prop: PlaygroundProps) => {
       language: selectedLanguage,
     };
     const response = await problemService.submit(req);
-    const data = response.data;
+    const data = response.data.data;
 
-    if (data.statusCode === 200) {
+    if (data.statusCode === 0) {
       loader.stop();
       toast.success("Congratulation, all testcases passed!");
     }
-    if (data.statusCode !== 200) {
+    if (data.statusCode !== 0) {
+      loader.stop();
+      toast.error(data.message);
+    }
+  };
+
+  const handleRunCode = async () => {
+    loader.start();
+    const problemService = new ProblemService();
+    const req: SubmitReq = {
+      problemID: prop.problem.id,
+      sourceCode: userCode,
+      language: selectedLanguage,
+    };
+    const response = await problemService.runCode(req);
+    const data = response.data;
+    console.log(data)
+
+    if (data.statusCode === 0) {
+      loader.stop();
+      toast.success("Congratulation, all testcases passed!");
+    }
+    if (data.statusCode !== 0) {
       loader.stop();
       toast.error(data.message);
     }
@@ -184,7 +206,7 @@ const Playground = (prop: PlaygroundProps) => {
           </div>
         </div>
       </Split>
-      <EditorFooter handleSubmit={handleSubmit} />
+      <EditorFooter handleSubmit={handleSubmit} handleRunCode={handleRunCode} />
     </div>
   );
 };
