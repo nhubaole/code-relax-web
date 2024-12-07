@@ -22,6 +22,8 @@ type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
   _solved: boolean;
+  onTabChange: any;
+  tab: string;
 };
 
 const ProblemDescription = (prop: ProblemDescriptionProps) => {
@@ -123,11 +125,24 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     <div className="bg-[#1E1E1E] rounded-lg">
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
-          className={
-            " rounded-t-[5px] px-5 py-[10px] text-base font-bold text-green-300 cursor-pointer"
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "description" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
+          onClick={
+            () => prop.onTabChange("description")
+           
           }
         >
           Description
+        </div>
+
+        <div
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "submission" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
+          onClick={() => prop.onTabChange("submission")}
+        >
+          Submission
         </div>
       </div>
 
@@ -262,19 +277,19 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                       value={newDiscussion}
                       onChange={(e) => {
                         let content = e.target.value;
-                    
+
                         if (effects.bold) {
                           content = `**${content}**`; // Thêm hiệu ứng Bold
                         }
-                    
+
                         if (effects.italic) {
                           content = `_${content}_`; // Thêm hiệu ứng Italic
                         }
-                    
+
                         if (effects.code) {
                           content = `\`${content}\``; // Thêm hiệu ứng Code
                         }
-                    
+
                         setNewDiscussion(content);
                       }}
                       onKeyDown={(e) => {
