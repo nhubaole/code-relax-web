@@ -1,5 +1,5 @@
-import Home from './components/home/Home';
-// import Workspace from './components/workspace/Workspace';
+// import Workspace from "./components/workspace/Workspace";
+import "react-toastify/dist/ReactToastify.css";
 import LogIn from './components/auth/Login';
  import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignUp from './components/auth/SignUp';
@@ -7,6 +7,7 @@ import Profile from './components/profile/Profile';
 import Navbar from './components/home/Navbar';
 import Problems from './components/problems/Problems';
 import { useState } from 'react';
+import Home from "./components/home/Home";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

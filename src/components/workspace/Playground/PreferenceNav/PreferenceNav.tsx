@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  AiOutlineFullscreen,
-  AiOutlineFullscreenExit,
-  AiOutlineSetting,
   AiOutlineCheck,
 } from "react-icons/ai";
 import { ISettings } from "../Playground";
-import SettingsModal from "../../../modals/SettingsModal";
 
 type PreferenceNavProps = {
   settings: ISettings;
@@ -24,14 +20,14 @@ const PreferenceNav: React.FC<PreferenceNavProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState("C++");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleFullScreen = () => {
-    if (isFullScreen) {
-      document.exitFullscreen();
-    } else {
-      document.documentElement.requestFullscreen();
-    }
-    setIsFullScreen(!isFullScreen);
-  };
+  // const handleFullScreen = () => {
+  //   if (isFullScreen) {
+  //     document.exitFullscreen();
+  //   } else {
+  //     document.documentElement.requestFullscreen();
+  //   }
+  //   setIsFullScreen(!isFullScreen);
+  // };
 
   useEffect(() => {
     function exitHandler(e: any) {
@@ -69,7 +65,7 @@ const PreferenceNav: React.FC<PreferenceNavProps> = ({
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
     setIsDropdownOpen(false);
-    onLanguageChange(language); // Gọi hàm xử lý sự kiện thay đổi ngôn ngữ và truyền ngôn ngữ mới
+    onLanguageChange(language);
   };
 
   const languages = ["C++", "Python", "Java"];
@@ -107,7 +103,7 @@ const PreferenceNav: React.FC<PreferenceNavProps> = ({
           className="z-10 bg-blacklight divide-y divide-gray-100 rounded-lg shadow w-44 absolute top-11 left-0 "
         >
           <ul
-            className="py-2 text-sm text-gray dark:text-textcolor "
+            className="py-2 text-sm text-gray dark:text-gray "
             aria-labelledby="dropdownHoverButton"
           >
             {languages.map((language) => (

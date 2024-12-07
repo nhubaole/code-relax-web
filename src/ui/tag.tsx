@@ -2,18 +2,18 @@ import solved from "../assets/solve.svg"
 
 export const EasyTag = () => {
     return (
-        <div>Easy</div>
+        <div className="bg-[#2A2B2D] rounded-[100px] text-green-300 font-medium text-base px-3 py-1">Easy</div>
     )
 }
 
 export const MediumTag = () => {
   return (
-    <div className="bg-[#2A2B2D] rounded-[100px] text-yellow-300 font-medium text-base px-2 py-1">Medium</div>
+    <div className="bg-[#2A2B2D] rounded-[100px] text-yellow-300 font-medium text-base px-3 py-1">Medium</div>
   )
 }
 export const HardTag = () => {
     return (
-        <div>Hard</div>
+        <div className="bg-[#2A2B2D] rounded-[100px] text-red font-medium px-3 py-1">Hard</div>
     )
 }
 

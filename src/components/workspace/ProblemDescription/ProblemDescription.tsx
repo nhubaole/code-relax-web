@@ -1,101 +1,166 @@
-import { useEffect, useState } from "react";
-import { AiOutlineLoading3Quarters, AiFillStar } from "react-icons/ai";
+import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { TiStarOutline } from "react-icons/ti";
-import { MediumTag, ProblemTag, SolvedTag } from "../../../ui/tag";
+import { BiBold, BiItalic, BiCode, BiLink } from "react-icons/bi";
+import {
+  EasyTag,
+  HardTag,
+  MediumTag,
+  ProblemTag,
+  SolvedTag,
+} from "../../../ui/tag";
 import tag from "../../../assets/tag.svg";
 import disscussion from "../../../assets/disscussion.svg";
 import down from "../../../assets/direction_down.svg";
 import up from "../../../assets/up.svg";
+import { testCaseFormatter } from "../../../utils/formatter";
+import { ProblemRes, TestCase } from "../../../models/problem";
+import { useEffect, useState } from "react";
+import { DiscussionRes } from "../../../models/discussion";
+import DiscussionService from "../../../services/DiscussionService";
+import { toast } from "react-toastify";
 type ProblemDescriptionProps = {
-  problemId: string;
+  testCases: TestCase[];
+  problem: ProblemRes;
   _solved: boolean;
+  onTabChange: any;
+  tab: string;
 };
 
-const ProblemDescription = () => {
-  // const [problem, setProblem] = useState<ProblemDetail | null>(null);
-  // const [loading, setLoading] = useState<boolean>(true);
-  // const [starred, setStarred] = useState(false);
-  // const [updating, setUpdating] = useState(false);
+const ProblemDescription = (prop: ProblemDescriptionProps) => {
+  const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
+  const [isRatingsOpen, setIsRatingsOpen] = useState(false);
 
-  // useEffect(() => {
-  //   const fetchProblemDetails = async () => {
-  //     try {
-  //       // setLoading(true);
-  //       const response = await fetch(
-  //         `http://localhost:5107/api/Problems/GetProblemDetail?problemId=1}`,
-  //         {
-  //           method: "GET",
-  //           mode: "cors",
-  //           headers: {
-  //             Accept: "application/json, text/plain",
-  //             "Content-Type": "application/json;charset=UTF-8",
-  //           },
-  //         }
-  //       );
-  //       const data = await response.json();
-  //       setProblem(data.data);
-  //     } catch (error) {
-  //       console.log("Failed to fetch problem details");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  const toggleDiscussion = () => setIsDiscussionOpen(!isDiscussionOpen);
+  const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
+  const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
+  const [newDiscussion, setNewDiscussion] = useState("");
 
-  //   fetchProblemDetails();
-  // }, [problemId]);
+  const [effects, setEffects] = useState({
+    bold: false,
+    italic: false,
+    code: false,
+    link: false,
+  });
 
-  const handleLike = async () => {
-    // Handle like functionality here
-  };
-
-  const handleDislike = async () => {
-    // Handle dislike functionality here
-  };
-
-  const handleStar = async () => {
-    // Handle star functionality here
+  const toggleEffect = (effect: keyof typeof effects) => {
+    setEffects((prev) => ({
+      ...prev,
+      [effect]: !prev[effect], // Đảo trạng thái của hiệu ứng được nhấn
+    }));
   };
 
   const tags = ["Dynamic Programing", "Array"];
-  const testCases = [
-    {
-      id: 1,
-      input: "nums = [0, 1, 2, 3], target = 9",
-      output: "[0, 1]",
-    },
-    {
-      id: 2,
-      input: "nums = [3, 2, 4], target = 6",
-      output: "[1, 2]",
-    },
-  ];
-  const problem = {
-    explaination:
-      "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. You can return the answer in any order.",
+  const testCasesRes = testCaseFormatter(prop.testCases);
+  const acceptanceRate =
+    prop.problem.numOfSubmission === 0
+      ? 0
+      : prop.problem.numOfAcceptance / prop.problem.numOfSubmission;
+
+  useEffect(() => {
+    const fetchdiscussion = async () => {
+      const discussionService = new DiscussionService();
+      const response = await discussionService.getByProblemID(prop.problem.id);
+      const data = response.data.data;
+      setDiscussions(data);
+    };
+    fetchdiscussion();
+  }, [prop.problem.id]);
+
+  const handleCreateDiscussion = async () => {
+    if (!newDiscussion.trim()) {
+      alert("Discussion content cannot be empty!");
+      return;
+    }
+
+    try {
+      const discussionService = new DiscussionService();
+
+      const createResponse = await discussionService.create({
+        content: newDiscussion,
+        type: "text",
+        userID: 3,
+        problemID: prop.problem.id,
+      });
+
+      if (createResponse.status === 201) {
+        const id = createResponse.data.data;
+
+        const getResponse = await discussionService.getByID(id);
+        if (getResponse.status === 200) {
+          const newDiscussionData = getResponse.data.data;
+
+          setDiscussions((prevDiscussions) => [
+            ...prevDiscussions,
+            newDiscussionData,
+          ]);
+
+          setNewDiscussion("");
+        } else {
+          toast.error("Failed to fetch discussion details. Please try again.");
+        }
+      } else {
+        toast.error("Failed to create discussion. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating discussion:", error);
+      toast.error(
+        "Error occurred while creating discussion. Please try again."
+      );
+    }
   };
+  const ratings = {
+    overall: 4.5,
+    totalReviews: 653,
+    breakdown: {
+      5: 80,
+      4: 60,
+      3: 40,
+      2: 20,
+      1: 10,
+    },
+  };
+
+  const maxRatingCount = Math.max(...Object.values(ratings.breakdown));
   return (
     <div className="bg-[#1E1E1E] rounded-lg">
-      {/* TAB */}
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
-          className={
-            " rounded-t-[5px] px-5 py-[10px] text-base font-bold text-green-300 cursor-pointer"
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "description" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
+          onClick={
+            () => prop.onTabChange("description")
+           
           }
         >
           Description
+        </div>
+
+        <div
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "submission" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
+          onClick={() => prop.onTabChange("submission")}
+        >
+          Submission
         </div>
       </div>
 
       <div className="flex px-0 py-4 h-[calc(100vh-94px)] overflow-y-auto">
         <div className="px-5">
-          {/* Problem heading */}
           <div className="break-all">
-            <div className="flex space-x-4 items-center">
+            <div className="flex space-x-4 items-center justify-between">
               <div className="flex mr-32 text-[#FFF] space-x-3">
-                <MediumTag />
-                <h1 className="text-2xl font-bold">Integer To Roman</h1>
+                {prop.problem.difficulty === 1 ? (
+                  <EasyTag />
+                ) : prop.problem.difficulty === 2 ? (
+                  <MediumTag />
+                ) : (
+                  <HardTag />
+                )}
+                <h1 className="text-2xl font-bold">{prop.problem?.title}</h1>
               </div>
-              <SolvedTag />
+              {prop._solved && <SolvedTag />}
             </div>
             <div className="flex mt-4 items-center space-x-2">
               <img src={tag} alt="" />
@@ -105,27 +170,23 @@ const ProblemDescription = () => {
               ))}
             </div>
             <div className="flex items-center mt-3">
-              <div
-                className="flex space-x-1 cursor-pointer rounded p-[3px] text-xl transition-colors duration-200 text-[#FFF]"
-                onClick={handleStar}
-              >
+              <div className="flex space-x-1 cursor-pointer rounded p-[3px] text-xl transition-colors duration-200 text-[#FFF]">
                 {[...Array(5)].map((_, index) => (
                   <TiStarOutline key={index} className="text-[#FFF]" />
                 ))}
               </div>
             </div>
 
-            {/* Problem Statement(paragraphs) */}
-            <div className="text-[#FFF] mt-4 whitespace-normal break-words">
-              <p>{problem.explaination}</p>
-            </div>
+            <div
+              className="text-[#FFF] mt-4 whitespace-normal break-words"
+              dangerouslySetInnerHTML={{ __html: prop.problem.explaination }}
+            ></div>
 
-            {/* Examples */}
             <div className="mt-4">
-              {testCases.map((example) => (
+              {testCasesRes.map((example, index) => (
                 <div className="mt-5" key={example.id}>
                   <p className="font-bold text-green-300">
-                    Example {example.id}:
+                    Example {index + 1}:
                   </p>
                   <div className="text-gray bg-blacklight space-y-3 mt-3 px-3 py-2 rounded-lg">
                     <pre className="whitespace-pre-wrap break-words">
@@ -140,54 +201,186 @@ const ProblemDescription = () => {
               ))}
             </div>
 
-            <div className="mt-6 rounded-lg text-white space-y-4">
-              {/* Stats Section */}
+            <div className="mt-6 rounded-lg text-white ">
               <div className="flex justify-between text-start">
                 <div>
                   <p className="text-purple-300 font-medium">ACCEPTED:</p>
-                  <p className="font-bold text-[#FFF]">14.7M</p>
+                  <p className="font-bold text-[#FFF]">
+                    {prop.problem?.numOfAcceptance}
+                  </p>
                 </div>
                 <div>
                   <p className="text-purple-300 font-medium">SUBMISSIONS:</p>
-                  <p className="font-bold text-[#FFF]">27.4M</p>
+                  <p className="font-bold text-[#FFF]">
+                    {prop.problem?.numOfSubmission}
+                  </p>
                 </div>
                 <div>
                   <p className="text-purple-300 font-medium">
                     ACCEPTANCE RATE:
                   </p>
-                  <p className="font-bold text-[#FFF]">53.9%</p>
+                  <p className="font-bold text-[#FFF]">{acceptanceRate}</p>
                 </div>
               </div>
 
-              {/* Discussion Panel */}
-              <div className="flex items-center justify-between p-4 bg-blacklight rounded-xl cursor-pointer">
+              <div
+                className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${
+                  isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
+                } cursor-pointer`}
+                onClick={toggleDiscussion}
+              >
                 <div className="flex items-center space-x-2 text-[#FFF]">
                   <img src={disscussion} alt="" />
                   <span className="font-bold">DISCUSSION</span>
                 </div>
-                <span>{false ? <img src={up} alt="" /> : <img src={down} alt="" /> }</span>
+                <span>
+                  {isDiscussionOpen ? (
+                    <img src={up} alt="" />
+                  ) : (
+                    <img src={down} alt="" />
+                  )}
+                </span>
               </div>
-              {
-                // <div className="p-4 bg-[#333] rounded-b-lg">
-                //   {/* Discussion content goes here */}
-                //   <p className="text-gray-300">Discussion content goes here.</p>
-                // </div>
-              }
+              {isDiscussionOpen && (
+                <div className="p-4 bg-blacklight rounded-b-xl">
+                  {/* Editor Section */}
+                  <div className="bg-black p-3 rounded-lg mb-4 text-gray">
+                    <div className="flex items-center space-x-5 mb-2 text-[#fff]">
+                      <BiBold
+                        className={`cursor-pointer ${
+                          effects.bold ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("bold")}
+                      />
+                      <BiItalic
+                        className={`cursor-pointer ${
+                          effects.italic ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("italic")}
+                      />
+                      <BiCode
+                        className={`cursor-pointer ${
+                          effects.code ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("code")}
+                      />
+                      <BiLink
+                        className={`cursor-pointer ${
+                          effects.link ? "text-green-500" : "text-[#fff]"
+                        }`}
+                        onClick={() => toggleEffect("link")}
+                      />
+                    </div>
+                    <textarea
+                      placeholder="Aa"
+                      className="w-full bg-[#1E1E1E] text-gray-400 p-2 rounded-md outline-none resize-none"
+                      value={newDiscussion}
+                      onChange={(e) => {
+                        let content = e.target.value;
 
-              {/* Ratings Panel */}
-              <div className="flex items-center justify-between p-4 bg-[#2A2A2A] rounded-xl cursor-pointer">
-                <div className="flex items-center space-x-2">
-                  <AiFillStar className="text-yellow-500 text-xl" />
-                  <span className="font-bold text-[#FFF]">4.2 RATINGS</span>
+                        if (effects.bold) {
+                          content = `**${content}**`; // Thêm hiệu ứng Bold
+                        }
+
+                        if (effects.italic) {
+                          content = `_${content}_`; // Thêm hiệu ứng Italic
+                        }
+
+                        if (effects.code) {
+                          content = `\`${content}\``; // Thêm hiệu ứng Code
+                        }
+
+                        setNewDiscussion(content);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleCreateDiscussion();
+                        }
+                      }}
+                    ></textarea>
+                  </div>
+                  {discussions.map((discussion) => (
+                    <div
+                      key={discussion.id}
+                      className="flex items-start space-x-4 my-4"
+                    >
+                      <img
+                        src={""}
+                        alt="User"
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <div className="text-gray">
+                        <p className="font-bold text-[#fff]">
+                          {discussion.user?.displayName || "Anonymous"}
+                        </p>
+                        <p>{discussion.content}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <span>{false ? <img src={up} alt="" /> : <img src={down} alt="" /> }</span>
+              )}
+
+              <div
+                className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${
+                  isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
+                } cursor-pointer`}
+                onClick={toggleRatings}
+              >
+                <div className="flex items-center space-x-2">
+                  <AiOutlineStar className="text-gray text-2xl" />
+                  <span className="font-bold text-[#FFF]">
+                    {ratings.overall} RATINGS
+                  </span>
+                </div>
+                <span>
+                  {isRatingsOpen ? (
+                    <img src={up} alt="" />
+                  ) : (
+                    <img src={down} alt="" />
+                  )}
+                </span>
               </div>
-              {
-                // <div className="p-4 bg-[#333] rounded-b-lg">
-                //   {/* Ratings content goes here */}
-                //   <p className="text-gray-300">Ratings content goes here.</p>
-                // </div>
-              }
+              {isRatingsOpen && (
+                <div className="p-4 bg-blacklight rounded-b-lg">
+                  <div className="flex items-center space-x-8 bg-black p-4 rounded-xl">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="flex items-center mb-4">
+                        <p className="text-4xl font-bold text-[#FFF]">
+                          {ratings.overall}
+                        </p>
+                        <AiFillStar className="text-yellow-500 text-2xl ml-2" />
+                      </div>
+                      <p className="text-gray bg-[#444] px-4 py-1 rounded-full w-max">
+                        {ratings.totalReviews} reviews
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex-1 space-y-2">
+                      {Object.entries(ratings.breakdown)
+                        .sort((a, b) => Number(b[0]) - Number(a[0])) // Sort by star level descending
+                        .map(([stars, count]) => (
+                          <div
+                            key={stars}
+                            className="flex items-center space-x-2"
+                          >
+                            <p className="text-gray font-medium">{stars}</p>
+                            <AiFillStar className="text-yellow-500 text-sm" />
+                            <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
+                              <div
+                                style={{
+                                  width: `${(count / maxRatingCount) * 100}%`,
+                                }}
+                                className="h-2  rounded-full bg-gradient-to-r from-green-700 to-green-500"
+                              ></div>
+                            </div>
+                            <p className="text-gray w-8 text-right">{count}</p>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
