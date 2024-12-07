@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import facebook from "../../assets/facebook.svg";
 import github from "../../assets/github.svg";
 import google from "../../assets/google.svg";
