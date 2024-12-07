@@ -8,6 +8,8 @@ import { ProblemRes, TestCase } from "../../models/problem";
 import ProblemService from "../../services/ProblemService";
 import SubmissionsTable from "./Submission/SubmissionTable";
 import SubmissionDetail from "./Submission/SubmissionDetail";
+import SubmissionService from "../../services/SubmissionService";
+import { SubmissionRes } from "../../models/submission";
 
 type WorkspaceProps = {
   problemId: number;
@@ -29,8 +31,9 @@ const Workspace = (prop: WorkspaceProps) => {
     createdAt: new Date(),
   });
   const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [submissions, setSubmissions] = useState<SubmissionRes[]>([]);
   const [tab, setTab] = useState("description");
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<SubmissionRes>();
 
   const handleTabChange = (newTab: string) => {
     setTab(newTab);
@@ -52,79 +55,21 @@ const Workspace = (prop: WorkspaceProps) => {
       setTestCases(data.data);
     };
 
+    const fetchSubmission = async () => {
+      const submissionService = new SubmissionService();
+
+      const response = await submissionService.getByProblemAndUserID(3,1);
+      const data = response.data;
+      setSubmissions(data.data);
+    };
+
     fetchProblem();
     fetchTestCase();
+    fetchSubmission()
   }, [prop.problemId]);
 
-  const mockSubmissions = [
-    {
-      id: 1,
-      status: "ACCEPTED",
-      language: "Python",
-      result: "12/12",
-      notes: "Best solution with O(n) complexity",
-      code: `def twoSum(nums, target):\n    num_map = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_map:\n            return [num_map[complement], i]\n        num_map[num] = i\n    return []`,
-      testCases: [
-        {
-          id: 1,
-          input: "nums = [2,7,11,15], target = 9",
-          output: "[0,1]",
-          status: "PASSED",
-        },
-        {
-          id: 2,
-          input: "nums = [3,2,4], target = 6",
-          output: "[1,2]",
-          status: "PASSED",
-        },
-      ],
-    },
-    {
-      id: 2,
-      status: "WRONG ANSWER",
-      language: "Java",
-      result: "10/12",
-      notes: "Edge cases failed",
-      code: `class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) {\n                return new int[] { map.get(complement), i };\n            }\n            map.put(nums[i], i);\n        }\n        return new int[0];\n    }\n}`,
-      testCases: [
-        {
-          id: 1,
-          input: "nums = [2,7,11,15], target = 9",
-          output: "[0,1]",
-          status: "PASSED",
-        },
-        {
-          id: 2,
-          input: "nums = [3,2,4], target = 6",
-          output: "[1,2]",
-          status: "FAILED",
-        },
-      ],
-    },
-    {
-      id: 3,
-      status: "ACCEPTED",
-      language: "C++",
-      result: "12/12",
-      notes: "Optimized solution",
-      code: `vector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> num_map;\n    for (int i = 0; i < nums.size(); i++) {\n        int complement = target - nums[i];\n        if (num_map.find(complement) != num_map.end()) {\n            return {num_map[complement], i};\n        }\n        num_map[nums[i]] = i;\n    }\n    return {};\n}`,
-      testCases: [
-        {
-          id: 1,
-          input: "nums = [2,7,11,15], target = 9",
-          output: "[0,1]",
-          status: "PASSED",
-        },
-        {
-          id: 2,
-          input: "nums = [3,2,4], target = 6",
-          output: "[1,2]",
-          status: "PASSED",
-        },
-      ],
-    },
-  ];
-  const handleSubmissionClick = (submission) => {
+  
+  const handleSubmissionClick = (submission: SubmissionRes) => {
     setSelectedSubmission(submission);
     setTab("submission");
   };
@@ -141,7 +86,7 @@ const Workspace = (prop: WorkspaceProps) => {
       <div className="flex flex-col h-full">
         {tab === "submission" ? (
           <SubmissionsTable
-            submissions={mockSubmissions}
+            submissions={submissions}
             onRowClick={handleSubmissionClick}
             onTabChange={handleTabChange}
             tab={tab}
@@ -162,7 +107,6 @@ const Workspace = (prop: WorkspaceProps) => {
         {tab === "submission" ? (
           <SubmissionDetail
             submission={selectedSubmission}
-            testCases={testCases}
           />
         ) : tab === "description" || tab === "submission" ? (
           testCases.length > 0 ? (
