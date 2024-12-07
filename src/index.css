@@ -11,4 +11,44 @@
     background-color: #2A2B2D;
     cursor: col-resize /* Blue color when hovered */
 }
-        
+
+.scrollbar-thin::-webkit-scrollbar,.flex-col::-webkit-scrollbar {
+    width: 6px; 
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb, .flex-col::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5); 
+    border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track, .flex-col::-webkit-scrollbar-thumb:hover {
+    background: transparent; 
+}
+
+.custom-checkbox {
+    appearance: none;
+    width: 15px; 
+    height: 15px; 
+    border: 1.5px solid #FFFFFF; 
+    border-radius: 4px; 
+    outline: none; 
+    cursor: pointer; 
+    position: relative; 
+    background-color:transparent;
+}
+
+.custom-checkbox:checked {
+    background-color: #FFFFFF;
+    border-color: #FFFFFF;
+}
+
+.custom-checkbox:checked::after {
+    content: ''; 
+    position: absolute;
+    left: 4px; 
+    width: 5px; 
+    height: 9px; 
+    border: solid black; 
+    border-width: 0px 2px 2px 0px; 
+    transform: rotate(45deg); 
+}
