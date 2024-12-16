@@ -12,5 +12,22 @@ export default  class SubmissionService {
           throw error;
         }
     }
-
+    async getByUserID(userId: number) {
+        const url = SUBMISSION_ENDPOINT + `/User/${userId}`;
+        try {
+          const res = await apiClient.get(url)
+          return res;
+        } catch (error) {
+          throw error;
+        }
+    }
+    async getStatisticByUserID(userId: number) {
+        const url = SUBMISSION_ENDPOINT + `/user-statistic/${userId}`;
+        try {
+          const res = await apiClient.get(url)
+          return res;
+        } catch (error) {
+          throw error;
+        }
+    }
 }
