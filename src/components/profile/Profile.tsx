@@ -10,13 +10,14 @@ import DivAccount from "./Account";
 import DivPoints from "./Points";
 import Footer from "./Footer";
 import PracticeHistory from "./PracticeHistory";
+import MyProblem from "./MyProblem";
 
 interface ProfileProps {
   onLogoutSuccess: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
-  const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history">("account");
+  const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history"| "myproblem">("account");
   const [selectedImage, setSelectedImage] = useState<string>(avatar);
   const navigate = useNavigate();
 
@@ -115,6 +116,20 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
             </button>
             <button
               type="button"
+              onClick={() => setActiveDiv("myproblem")}
+              className={`w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600 ${
+                activeDiv === "myproblem" ? "bg-green-500" : ""
+              }`}
+            >
+              <img
+                src={account}
+                alt="Account Icon"
+                className="inline w-5 h-5 mr-3"
+              />
+              My Problem
+            </button>
+            <button
+              type="button"
               onClick={handleLogout}
               className="w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600"
             >
@@ -134,8 +149,10 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
             <DivAccount />
           ) : activeDiv === "points" ? (
             <DivPoints />
-          ) : (
+          ) : activeDiv === "practice_history" ? (
             <PracticeHistory />
+          ) : (
+            <MyProblem/>
           )}
         </div>
       </div>

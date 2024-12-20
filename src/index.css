@@ -52,3 +52,23 @@
     border-width: 0px 2px 2px 0px; 
     transform: rotate(45deg); 
 }
+
+.custom-modal .ant-modal-content {
+    background-color: #159571; /* Xanh */
+    color: white; /* Màu chữ trắng */
+  }
+  
+  .custom-modal .ant-modal-header {
+    background-color: #159571; 
+    color: white; 
+  }
+  
+  .custom-modal .ant-modal-footer {
+    background-color: #159571; 
+    color: white;
+  }
+  
+  .custom-modal .ant-modal-title {
+    color: white;
+  }
+  
