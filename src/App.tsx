@@ -14,6 +14,7 @@ import Problems from "./components/problems/Problems";
 import { useState } from "react";
 import Home from "./components/home/Home";
 import Workspace from "./components/workspace/Workspace";
+import Admin from "./pages/admin";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,6 +34,7 @@ function App() {
       <>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/workspace" element={<Workspace problemId={1} />} />
           <Route
@@ -49,7 +51,7 @@ function App() {
             element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
           />
         </Routes>
-        {location.pathname !== "/workspace" && (
+        {(location.pathname !== "/workspace" && location.pathname !== "/admin") && (
           <div className="absolute top-0 left-0 w-full">
             <Navbar isLoggedIn={isLoggedIn} />
           </div>

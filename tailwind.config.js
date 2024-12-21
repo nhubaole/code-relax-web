@@ -33,6 +33,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Manrope', 'sans-serif'], 
+        popi: 'Poppins',
       },
     },
   },
