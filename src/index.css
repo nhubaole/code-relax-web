@@ -1,7 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Custom styles for the Ant Design Select */
+/* Custom styles for Ant Design Select */
+.custom-select {
+    @apply  rounded-lg bg-[#16151C] text-[white];
+    .ant-select-selection-item {
+        @apply text-[#A2A1A8CC] border-none rounded-lg px-3 py-1 flex items-center cursor-pointer;
+      }
+    /* Ensure the inner input background matches */
+    .ant-select-selector {
+      @apply bg-[#16151C] outline-none border-none !important;
+    }
+     /* Remove focus outline and apply custom border */
 
+    .ant-select-selection-placeholder {
+      @apply text-[#A2A1A8CC] !important;
+    }
+    
+ 
+  }
+/* Custom styling for the remove (x) icon */
+.custom-select .ant-select-selection-item-remove {
+    color: #A2A1A833!important; /* Tailwind red-500 */
+    transition: color 0.3s;
+  }
+  
+  .custom-select .ant-select-selection-item-remove:hover {
+    color: #A2A1A833 !important; /* Tailwind red-400 */
+  }
+  
+  /* Dropdown Icon Styling */
+.custom-select .ant-select-arrow {
+    @apply text-[#A2A1A833]; /* Change the dropdown arrow color */
+  }
+  /* Custom dropdown styling */
+  .custom-dropdown {
+    @apply rounded-lg bg-[#16151C] border border-[#A2A1A833] shadow-lg  !important;
+  
+   
+   
+  }
+  
+  
 .gutter-vertical:hover {
     background-color: #2A2B2D;
     cursor: row-resize /* Blue color when hovered */

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import AllProblemPage from "./AllProblemPage";
+import AllProblemPage from "./problem/AllProblemPage";
+import CreateProblemForm from "./problem/form/CreateProblemForm";
 
 const Sidebar = () => {
   const menuItems = [
@@ -38,8 +39,7 @@ const Sidebar = () => {
       <div className="flex-1 bg-gray-100 text-black p-5">
         {activeMenu === "New problem" && (
           <div>
-            <h1 className="text-2xl font-bold mb-4">New Problem</h1>
-            <p>Create a new problem here!</p>
+           <CreateProblemForm/>
           </div>
         )}
         {activeMenu === "Problem" && (

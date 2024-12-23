@@ -1,6 +1,6 @@
-import Pagination from "./Pagination";
+import { Pagination } from "antd";
+import SearchBar from "../Searchbar";
 import ProblemTable from "./ProblemTable";
-import SearchBar from "./Searchbar";
 
 
 const AllProblemPage = () => {
@@ -8,7 +8,7 @@ const AllProblemPage = () => {
     <div className="h-screen text-[white]">
       <SearchBar />
       <ProblemTable />
-      <Pagination />
+      <Pagination  className="text-gray"/>
     </div>
   );
 };
