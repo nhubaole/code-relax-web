@@ -55,8 +55,10 @@ function Navbar(props: NavbarProps) {
         </Link>
         <Link
           to="/explore"
+          
           className={`hover:text-green-600 ${
-            location.pathname === "/explore" ? "border-b-2 border-gray-200" : ""
+            ["/explore", "/detailexplore"].includes(location.pathname)
+            ? "border-b-2 border-gray-200" : ""
           }`}
         >
           Explore

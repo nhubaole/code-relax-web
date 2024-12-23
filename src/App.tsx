@@ -17,6 +17,7 @@ import Workspace from "./components/workspace/Workspace";
 import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
+import DetailExplore from "./components/explore/DetailExplore";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,8 +40,8 @@ function App() {
           <Route path="/problems" element={<Problems />} />
           <Route path="/workspace" element={<Workspace problemId={1} />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/leaderboard" element={<LeaderBoard isLoggedIn={isLoggedIn}/>}
-          />
+          <Route path="/detailexplore" element={<DetailExplore />} />
+          <Route path="/leaderboard" element={<LeaderBoard isLoggedIn={isLoggedIn}/>}/>
           <Route
             path="/login"
             element={<LogIn onLoginSuccess={handleLoginSuccess} />}
