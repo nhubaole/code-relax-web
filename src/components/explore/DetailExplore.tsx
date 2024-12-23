@@ -3,29 +3,28 @@ import quizs from "../../assets/quizs.svg";
 import icquestion from "../../assets/question.svg";
 import down from "../../assets/direction_down.svg";
 import image from "../../assets/detailexplore.png";
-import { Link } from "react-router-dom";
 import React, { useState } from "react";
-
-const Topic: React.FC <{
-    name: string; 
-    image: string;
-    content:string}> = ({ name, image, content }) => {
-    return (
-        <Link to="/detailexplore" className="w-[275px] h-[320px] bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40">
-            <img
-                className="w-full h-[170px]"
-                src={image}
-                alt="Background"
-            />
-            <p className="px-4 mt-4 font-medium text-left text-[#ffffff]">{name}</p>
-            <p className="px-4 mt-3 mb-4 text-left text-sm text-[#ffffff]">{content}</p>
-        </Link>
-    );
-};
-
-const DeatailExplore = () => {
+interface DeatailExploreProps {
+    isLoggedIn: boolean;
+  }
+  
+const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
     const [isVisible, setIsVisible] = useState(false);
-    const [selectedAnswer, setSelectedAnswer] = useState({}); 
+    const [selectedAnswer, setSelectedAnswer] = useState({});
+    const [isSubmit, setIsSubmit] = useState(false);
+    const [correctAns, setCorrectAns] = useState(0);
+
+    const handleSubmit = () => {
+        setIsSubmit(true); 
+        let correctCount = 0;
+        Object.entries(selectedAnswer).forEach(([index, answer]) => {
+          const q = questions[parseInt(index)];
+          if (q.correctAnswer === answer) {
+            correctCount += 1;
+          }
+        });
+        setCorrectAns(correctCount);
+    };
 
     const handleClick = (index: number, optionKey: string) => {
       setSelectedAnswer((prev) => ({
@@ -79,15 +78,22 @@ const DeatailExplore = () => {
                             alt="icon"
                         />
                         <span className="text-left text-sm ml-2 text-[#FFFFFF]">QUIZS</span>
-                        <label htmlFor="fileInput" className="ml-auto cursor-pointer">
-                            <img src={down} alt="Icon" className="w-6 h-6"/>
-                        </label> 
+                        {props.isLoggedIn ? (
+                            <div className="ml-auto text-green-300">Please log in to continue.</div>
+                            ) : (
+                            <label htmlFor="fileInput" className="ml-auto cursor-pointer">
+                                <img src={down} alt="Icon" className="w-6 h-6"/>
+                            </label> )}
                     </button>
+                    
+                    {isSubmit && (
+                        <p className="text-green-300"><span className="text-3xl font-bold">{correctAns}</span> /{questions.length} Correct Answers</p>
+                    )}
 
-                    {isVisible && (
+                    {isVisible && !props.isLoggedIn && (
                         <div>
                             {questions.map((q, index) => (
-                            <div key={index} className="py-4 mt-4 text-[#FFFFFF] border-t border-[#FFFFFF] border-opacity-40">
+                            <div key={index} className="py-4 mt-4 mb-12 text-[#FFFFFF] border-t border-[#FFFFFF] border-opacity-40">
                                 <div className="flex items-center flex-none w-full">
                                 <img
                                     className="flex-none object-cover w-[20px] h-[20px]"
@@ -98,31 +104,53 @@ const DeatailExplore = () => {
                                 </div>
                                 
                                 <div className="mt-4 border border-[#FFFFFF] border-opacity-40 rounded-lg px-6 py-4 bg-black">
-                                <p >{q.question}</p>
+                                    <p >{q.question}</p>
                                 </div>
-                    
+
                                 <div>
                                     {Object.entries(q.options).map(([key, value]) => {
-                                    const isSelected = selectedAnswer[index] === key;
-                                    const buttonClass = isSelected
-                                        ? "bg-purple-500"  
-                                        : "";     
-                                    return (
-                                        <button
-                                        key={key}
-                                        className={`w-full mt-4 border border-[#FFFFFF] rounded-lg px-4 py-2 text-left ${buttonClass}`}
-                                        onClick={() => handleClick(index, key)}
-                                        >
-                                        <label htmlFor={key} className="ml-2">{value}</label>
-                                        </button>
-                                    );
+                                        const isSelected = selectedAnswer[index] === key;
+                                        const isCorrect = key === q.correctAnswer;
+
+                                        const buttonClass = isSubmit
+                                            ? isCorrect
+                                            ? "border-green-500"
+                                            : isSelected
+                                            ? "border-red"
+                                            : "border-[#FFFFFF]"
+                                            : isSelected
+                                            ? "bg-purple-500"
+                                            : "";
+
+                                        return (
+                                            <button
+                                            key={key}
+                                            className={`w-full mt-4 border rounded-lg px-4 py-2 text-left ${buttonClass}`}
+                                            onClick={() => !isSubmit && handleClick(index, key)}
+                                            disabled={isSubmit}
+                                            >
+                                            <label htmlFor={key} className="ml-2">{value}</label>
+                                            </button>
+                                        );
                                     })}
                                 </div>
+
+                                {isSubmit && (
+                                    <div className="mt-4 px-6 py-2 bg-[#ffffff] bg-opacity-10 rounded-xl">
+                                        <p className="text-yellow-300">Explanation</p>
+                                        <p className="text-sm">{q.explanation}</p>
+                                    </div>
+                                )}
                             </div>
                             ))}
 
-                            <button className="mt-10 ml-auto bg-yellow-300 text-black w-[200px] rounded-2xl py-1 flex items-center justify-center">Submit</button>
-                      </div>
+                            <button 
+                            className="mt-10 ml-auto bg-yellow-300 text-black w-[200px] rounded-2xl py-1 flex items-center justify-center"
+                            onClick={handleSubmit}
+                            style={{ display: isSubmit ? "none" : "flex" }}>
+                                Submit
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>            
@@ -141,6 +169,7 @@ const questions = [
             d: "D. User Involvement"
         },
         correctAnswer: "b",  
+        explanation: "Cryptocurrency is more than just digital money; it represents a shift in how we view and handle financial transactions.",
     },
     {
         question: "What does UI stand for in the context of design?",
@@ -151,6 +180,7 @@ const questions = [
             d: "D. User Involvement"
         },
         correctAnswer: "a",  
+        explanation: "Cryptocurrency is more than just digital money; it represents a shift in how we view and handle financial transactions.",
     }
   ];
   
