@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import AllProblemPage from "./problem/AllProblemPage";
 import CreateProblemForm from "./problem/form/CreateProblemForm";
+import CreateArticleForm from "./article/form/CreateArticleForm";
 
 const Sidebar = () => {
   const menuItems = [
     { name: "New problem", icon: "🏠" },
     { name: "Problem", icon: "👥" },
-    { name: "Article", icon: "🏢" },
+    { name: "New Article", icon: "🏢" },
   ];
 
   const [activeMenu, setActiveMenu] = useState("New problem");
@@ -21,7 +22,7 @@ const Sidebar = () => {
           {menuItems.map((item) => (
             <li
               key={item.name}
-              onClick={() => setActiveMenu(item.name)} // Update active menu
+              onClick={() => setActiveMenu(item.name)} 
               className={`flex items-center text-[white] gap-4 p-3 rounded-tr-lg rounded-br-lg cursor-pointer ${
                 activeMenu === item.name
                   ? "border-l-2 border-[#7152F3] bg-[#7152F30D] text-[#7152F3]"
@@ -47,10 +48,9 @@ const Sidebar = () => {
            <AllProblemPage/>
           </div>
         )}
-        {activeMenu === "Article" && (
+        {activeMenu === "New Article" && (
           <div>
-            <h1 className="text-2xl font-bold mb-4">Articles</h1>
-            <p>Explore our latest articles here!</p>
+            <CreateArticleForm/>
           </div>
         )}
       </div>
