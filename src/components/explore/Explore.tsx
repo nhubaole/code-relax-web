@@ -1,27 +1,27 @@
 import Footer from "../profile/Footer";
 import unsplash from "../../assets/unsplash.png";
+import { Link } from "react-router-dom";
 
 const Topic: React.FC <{
     name: string; 
     image: string;
     content:string}> = ({ name, image, content }) => {
     return (
-        <div className="w-[275px] h-[320px] bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40">
+        <Link to="/detailexplore" className="w-[275px] h-[320px] bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40">
             <img
                 className="w-full h-[170px]"
                 src={image}
                 alt="Background"
             />
             <p className="px-4 mt-4 font-medium text-left text-[#ffffff]">{name}</p>
-            <p className="px-4 mt-3 mb-4 text-left text-sm text-[#ffffff]">{content}    
-            </p>
-        </div>
+            <p className="px-4 mt-3 mb-4 text-left text-sm text-[#ffffff]">{content}</p>
+        </Link>
     );
 };
 
 const Explore = () => {
     return (
-        <div className="relative flex flex-col min-h-screen bg-gradient-to-l from-green-500 to-textcolorlight">            
+        <div className="relative flex flex-col min-h-screen bg-gradient-to-l from-green-500 to-textcolorlight ">            
             <div className="flex-col flex-grow px-16 py-2 mt-28">
                 <div className="flex flex-col justify-center mt-6 space-y-8">
                     <h1 className="font-bold text-3xl text-center text-[#FFFFFF]">Learn About Programming</h1>

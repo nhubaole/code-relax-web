@@ -1,16 +1,42 @@
-import React, { useState } from 'react';
+import {  useState } from 'react';
 import facebook from "../../assets/facebook.svg";
 import github from "../../assets/github.svg";
 import google from "../../assets/google.svg";
+import { UserInfo, UserUpdateReq } from '../../models/user';
+import UserService from '../../services/UserService';
 
-
-const password = "password"; 
-
-const DivAccount = () => {
+interface DivAccountProps {
+    currentUser: UserInfo | null;
+    onUpdateSuccess: () => void;
+}
+  
+const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
     const [isEditing, setIsEditing] = useState(false);
 
-    const handleEditClick = () => {
-        setIsEditing(!isEditing);
+    const handleEditClick = async () => {
+        if (isEditing) {            
+            try {
+                const name = (document.getElementById('_name') as HTMLInputElement).value;
+                //const password = (document.getElementById('_password') as HTMLInputElement).value;
+                const email = (document.getElementById('_email') as HTMLInputElement).value;
+                const updateData: UserUpdateReq = {
+                    id: currentUser?.id || 0,
+                    displayName: name,
+                    email: email,
+                    password: "User#1234",
+                    role: currentUser?.role || 0,
+                };
+                const updatedUser = await UserService.updateUser(updateData);
+                console.log("User updated:", updatedUser);
+                setIsEditing(!isEditing);
+                onUpdateSuccess();
+            } catch (error) {
+                console.error("Failed to update user:", error);
+            }
+        }
+        else { 
+            setIsEditing(!isEditing);
+        }       
     };
 
     return (
@@ -19,12 +45,13 @@ const DivAccount = () => {
 
             <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col space-y-3">
                 <div className="flex flex-1 p-1.5">
-                    <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Display name</span>   
+                    <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">DisplayName</span>   
                     <input
                         id='_name'
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 bg-opacity-0 text-sm border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue="Ha Anh"
+                        defaultValue={currentUser?.displayName}
+                       // onChange={handleChange}
                         readOnly={!isEditing}
                         required
                     />      
@@ -38,7 +65,8 @@ const DivAccount = () => {
                         id='_email'
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue="hamaianh03@gmail.com"
+                        defaultValue={currentUser?.email}
+                        //onChange={handleChange}
                         readOnly={!isEditing}
                         required
                     />               
@@ -52,7 +80,8 @@ const DivAccount = () => {
                         id='_password'
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue={'*'.repeat(password.length)}
+                        defaultValue={'*'.repeat(currentUser?.password.length ?? 0)}
+                        //onChange={handleChange}
                         readOnly={!isEditing}
                         required
                     />   
@@ -64,7 +93,7 @@ const DivAccount = () => {
 
             <h1 className="text-left text-[#FFFFFF] mb-4 mt-8">Social Account</h1>
             
-            <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col py-4 space-y-3">
+            <div className="bg-[#ffffff] bg-opacity-10 px-6 py-4 rounded-xl shadow-2xl flex-col space-y-3">
                 <div className="flex flex-1 py-1.5 px-4">
                     <img src={google} alt="Icon" className="w-6 h-6 mr-2" /> 
                     <span className="mt-0.5 flex-none text-sm w-96 text-left text-[#FFFFFF]">Google</span>   
@@ -72,7 +101,8 @@ const DivAccount = () => {
                         id='_google'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF]  bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue="Your Google username or url"
+                        placeholder="Your Google username or url"
+                        value={currentUser?.google}
                         readOnly={!isEditing}
                         required
                     />      
@@ -87,7 +117,8 @@ const DivAccount = () => {
                         id='_github'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue="Your Github username or url"
+                        placeholder="Your Github username or url"
+                        value={currentUser?.github}
                         readOnly={!isEditing}
                         required
                     />               
@@ -102,7 +133,8 @@ const DivAccount = () => {
                         id='_facebook'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue='Your Facebook username or url'
+                        placeholder='Your Facebook username or url'                        
+                        value={currentUser?.facebook}
                         readOnly={!isEditing}
                         required
                     />   

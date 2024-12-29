@@ -11,7 +11,7 @@ import SignUp from "./components/auth/SignUp";
 import Profile from "./components/profile/Profile";
 import Navbar from "./components/home/Navbar";
 import Problems from "./components/problems/Problems";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Home from "./components/home/Home";
 import Workspace from "./components/workspace/Workspace";
 import { ToastContainer } from "react-toastify";
@@ -21,26 +21,35 @@ import DetailExplore from "./components/explore/DetailExplore";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    const storedLoginStatus = localStorage.getItem("isLoggedIn");
+    if (storedLoginStatus === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
+    localStorage.setItem("isLoggedIn", "true");
   };
 
   const handleLogoutSuccess = () => {
     setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
   };
 
   const Layout = () => {
     const location = useLocation();
 
     return (
-      <>
+      <> 
         <Routes>
           <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
           <Route path="/problems" element={<Problems />} />
           <Route path="/workspace" element={<Workspace problemId={1} />} />
           <Route path="/explore" element={<Explore />} />
-          <Route path="/detailexplore" element={<DetailExplore />} />
+          <Route path="/detailexplore" element={<DetailExplore isLoggedIn={isLoggedIn}/>} />
           <Route path="/leaderboard" element={<LeaderBoard isLoggedIn={isLoggedIn}/>}/>
           <Route
             path="/login"
@@ -53,8 +62,8 @@ function App() {
           />
         </Routes>
         {location.pathname !== "/workspace" && (
-          <div className="absolute top-0 left-0 w-full">
-            <Navbar isLoggedIn={isLoggedIn} />
+          <div className="absolute top-0 left-0 w-full">           
+              <Navbar isLoggedIn={isLoggedIn} />            
           </div>
         )}
       </>
@@ -62,10 +71,11 @@ function App() {
   };
 
   return (
-    <Router>
-      <Layout />
-      <ToastContainer />
-    </Router>
+      <Router>
+        <Layout />
+        <ToastContainer />
+      </Router>
+    
   );
 }
 
