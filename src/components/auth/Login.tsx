@@ -3,7 +3,7 @@ import PasswordInput from "./InputPassword";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-function LogIn({ onLoginSuccess }) {
+function LogIn({ onLoginSuccess }:any) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();

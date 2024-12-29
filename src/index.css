@@ -7,6 +7,13 @@ ant-radio-checked .ant-radio-inner{
   border-color: red !important ;
 }
 
+button:disabled {
+  background-color: #7152F3 !important; /* Màu nền khi bị vô hiệu hóa */
+  color: #fff !important; /* Màu nền khi bị vô hiệu hóa */
+  cursor: not-allowed; /* Thay đổi con trỏ chuột */
+}
+
+
 .ant-radio  {
   border-color: #A2A1A8 !important;
   background-color: #2A2B2D !important;

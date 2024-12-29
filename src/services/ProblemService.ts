@@ -1,4 +1,4 @@
-import { SubmitReq } from "../models/problem";
+import { CreateProblemReq, SubmitReq } from "../models/problem";
 import { apiClient } from "../utils/apiClient";
 import { PROBLEM_ENDPOINT } from "../utils/constants";
 
@@ -13,6 +13,16 @@ export default  class ProblemService {
           throw error;
         }
     }
+
+    async getAll() {
+      const url = PROBLEM_ENDPOINT;
+      try {
+        const res = await apiClient.get(url)
+        return res;
+      } catch (error) {
+        throw error;
+      }
+  }
     
     async getTestCaseByProblem(id:number) {
         const url = PROBLEM_ENDPOINT + `/GetTestcase?problemID=${id}`
@@ -36,6 +46,16 @@ export default  class ProblemService {
 
     async runCode(req: SubmitReq){
       const url = PROBLEM_ENDPOINT + '/RunCode'
+      try {
+        const res = await apiClient.post(url, req)
+        return res;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    async createProblem(req: CreateProblemReq){
+      const url = PROBLEM_ENDPOINT + '/CreateProblem'
       try {
         const res = await apiClient.post(url, req)
         return res;

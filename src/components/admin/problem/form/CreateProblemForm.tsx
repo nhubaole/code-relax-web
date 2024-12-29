@@ -1,34 +1,180 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input, DatePicker, Select, Button, SelectProps, Modal } from "antd";
+import { TagRes } from "../../../../models/tag";
+import TagService from "../../../../services/TagService";
+import { toast } from "react-toastify";
+import ProblemService from "../../../../services/ProblemService";
+import { CreateProblemReq } from "../../../../models/problem";
 
 const { Option } = Select;
-const options: SelectProps['options'] = [
-    { value: 'Array' },
-    { value: 'Hash Map' },
-    { value: 'String' },
-    { value: 'Dynamic Programming' },
-  ];
+
 
 const CreateProblemForm: React.FC = () => {
   const [testCases, setTestCases] = useState<any[]>([]);
+  const [tags, setTags] = useState<TagRes[]>([])
   const [showModal, setShowModal] = useState(false);
   const [currentParams, setCurrentParams] = useState<{ [key: string]: string | number }>({});
   const [testCaseFields, setTestCaseFields] = useState<string[]>([]);
+  const [output, setOutput] = useState<string[]>([]);
   const [fieldValues, setFieldValues] = useState<{ [key: string]: string }>({});
+  const [isAddingValue, setIsAddingValue] = useState(false);
+  const [title, setTitle] = useState<string>("");
+  const [explaination, setExplaination] = useState<string>("");
+  const [difficulty, setDifficulty] = useState<number | undefined>(undefined);
+  const [functionName, setFunctionName] = useState<string>("");
+  const [returnType, setReturnType] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [inputJson, setInputJson] = useState<string[]>([]);
+  const [outputJson, setOutputJson] = useState<string[]>([]); 
+
+  
+  const handlePrepareInputJson = () => {
+    const variableNames = Object.values(fieldValues); // Extract variable names (e.g., ['nums', 'target'])
+  
+    const preparedInputJson = testCases.map((testCase) => {
+      // Construct the JSON object for each test case
+      const input = variableNames.reduce((acc, variableName, idx) => {
+        let value = testCase[`Param ${idx + 1}`]; // Get the raw input value
+  
+        // Parse value dynamically
+        try {
+          if (typeof value === "string") {
+            // Attempt to parse JSON for arrays or objects
+            const parsedValue = JSON.parse(value);
+            value = parsedValue;
+          } else if (!isNaN(value)) {
+            value = Number(value); // Convert to number if numeric
+          } else {
+            value = String(value); // Otherwise, treat as string
+          }
+        } catch {
+          // If parsing fails, treat as string
+          value = String(value);
+        }
+  
+        acc[variableName] = value; // Map the value to the variable name
+        return acc;
+      }, {});
+  
+      // Convert to a properly formatted JSON string
+      return JSON.stringify(input);
+    });
+  
+    // Set formatted JSON strings in inputJson state
+    console.log("Prepared Input JSON:", preparedInputJson);
+    return preparedInputJson
+  };
+  
+  
+
+  const handleSubmit = async () => {
+    
+    const input = handlePrepareInputJson();
+    const problemData: CreateProblemReq = {
+      title: title,
+      explaination: explaination,
+      difficulty: difficulty || 0, // Ensure default value if not selected
+      functionName: functionName,
+      returnType: returnType,
+      tags: selectedTags, // Assuming you select tags
+      input: input,
+      output: outputJson,
+    };
+    console.log("problem",problemData);
+  
+    const problemService = new ProblemService();
+    try {
+      await problemService.createProblem(problemData);
+      toast.success("Problem created successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create problem.");
+    }
+  };
+
+  useEffect(() => {
+      fetchAllTag();
+  },[]);
+
+  const fetchAllTag = async () => {
+    const tagService = new TagService();
+    try {
+      const response = await tagService.getAll();
+      setTags(response.data.data);
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+    }
+  };
+  const options: SelectProps['options'] = tags.map(tag => ({
+    value: tag.name, 
+  }));
 
   const handleAddValue = () => {
-    setShowModal(true);
+    resetModalState(); // Đảm bảo trạng thái được xóa
+    setIsAddingValue(true); // Kích hoạt trạng thái "đang thêm giá trị"
+    setShowModal(true); // Hiển thị modal
+  };
+
+  const resetModalState = () => {
+    setCurrentParams({});
+    setOutput([]); // Reset output
   };
 
   const handleAddTestCase = () => {
-    setTestCases([...testCases, currentParams]);
+    setTestCases([...testCases, { ...currentParams }]); // Include the array of outputs
+
     setCurrentParams({});
+    const transformedOutput = output.map((value) => {
+      // Attempt to parse the value if it's a string and looks like an array
+      if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
+        try {
+          value = JSON.parse(value); // Parse the string into an array
+        } catch {
+          // If parsing fails, keep the value as is
+          console.error("Failed to parse value:", value);
+        }
+      }
+    
+      switch (returnType) {
+        case "string":
+          return `{"output": "${value}"}`; // Wrap value in quotes for string
+        case "int":
+          return `{"output": ${parseInt(value, 10)}}`; // Parse as integer
+        case "bool":
+          return `{output: ${value === "true"}}`; // Convert to boolean
+        case "list<string>":
+          if (Array.isArray(value)) {
+            // If already an array, map each item as a string
+            return `{"output": [${value.map((item) => `"${item}"`).join(", ")}]}`;
+          } else {
+            // If comma-separated string, split and format as an array of strings
+            return `{"output": [${value.split(",").map((item) => `"${item.trim()}"`).join(", ")}]}`;
+          }
+        case "list<int>":
+          if (Array.isArray(value)) {
+            // If already an array, keep numbers as they are
+            return `{"output": [${value.join(", ")}]}`;
+          } else {
+            // If comma-separated string, split and format as an array of numbers
+            return `{"output": [${value.split(",").map((item) => parseInt(item.trim(), 10)).join(", ")}]}`;
+          }
+        default:
+          throw new Error("Invalid return type");
+      }
+    });
+    setOutputJson(transformedOutput);
     setShowModal(false);
   };
 
+
   const handleFieldChange = (field: string, value: string | number) => {
-    setCurrentParams({ ...currentParams, [field]: value });
+    if (field === "Output") {
+      setOutput([ value as string]); // Add new value to output array
+    } else {
+      setCurrentParams({ ...currentParams, [field]: value });
+    }
   };
+  
 
   const addField = () => {
     setTestCaseFields([...testCaseFields, `Param ${testCaseFields.length + 1}`]);
@@ -51,6 +197,8 @@ const CreateProblemForm: React.FC = () => {
   const removeTestCase = (index: number) => {
     const updatedTestCases = testCases.filter((_, idx) => idx !== index);
     setTestCases(updatedTestCases);
+    const updatedOutput = output.filter((_, idx) => idx !== index);
+    setOutput(updatedOutput);
   };
   return (
     <div className="bg-dark-500 p-8 rounded-lg w-full max-w-4xl mx-auto text-[white]">
@@ -60,12 +208,15 @@ const CreateProblemForm: React.FC = () => {
 
       <form>
         <div className="grid grid-cols-2 gap-7 text-[#A2A1A8CC]">
-          <input  type="text" placeholder="Title" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833] focus:outline-none" />
-          <input  type="text" placeholder="Explaination" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
-          <input  type="text" placeholder="Function Name" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
+          <input  type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833] focus:outline-none" />
+          <input  type="text" placeholder="Explaination" value={explaination}
+      onChange={(e) => setExplaination(e.target.value)}  className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
+          <input  type="text" placeholder="Function Name" value={functionName}
+      onChange={(e) => setFunctionName(e.target.value)} className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
           <Select
             placeholder="Return Type"
             size="large"
+            onChange={(value) => setReturnType(value)}
             className="w-full custom-dropdown custom-select"
           >
                 <Option className="rounded-lg" value="string">String</Option>
@@ -77,12 +228,13 @@ const CreateProblemForm: React.FC = () => {
         
           <Select
             placeholder="Difficulty"
+            onChange={(value)=>setDifficulty(value)}
             size="large"
             className="w-full custom-dropdown custom-select"
           >
-                <Option className="rounded-lg" value="1">Easy</Option>
-                <Option  className="rounded-lg" value="2">Medium</Option>
-                <Option  className="rounded-lg"  value="3">Hard</Option>
+                <Option className="rounded-lg" value="0">Easy</Option>
+                <Option  className="rounded-lg" value="1">Medium</Option>
+                <Option  className="rounded-lg"  value="2">Hard</Option>
           </Select>
           <Select
             placeholder="Tag"
@@ -90,6 +242,8 @@ const CreateProblemForm: React.FC = () => {
             size="large"
             className="w-full custom-dropdown custom-select"
             options={options}
+            value={selectedTags} 
+            onChange={(values) => setSelectedTags(values)}
           >
           </Select>
           
@@ -100,7 +254,9 @@ const CreateProblemForm: React.FC = () => {
            <div className="mt-8 border-r border-[#A2A1A8] pr-24">
           <h3 className="text-lg mb-4">Testcase Definition</h3>
           <div className="flex space-x-6 mb-4">
-            <Button onClick={addField} className="bg-[#7152F3] text-[white] border-none">
+            <Button disabled={isAddingValue}  onClick={addField}  className={`bg-[#7152F3] text-[white] border-none ${
+          isAddingValue ? "disabled-btn" : ""
+        }`}>
               Add New Param
             </Button>
             <Button onClick={handleAddValue} className=" bg-[#16151C] text-[white] border px-10 border-[#A2A1A833]">
@@ -127,8 +283,9 @@ const CreateProblemForm: React.FC = () => {
         {/* Render Testcases */}
         <div className="mt-8 ml-5">
           <div className="space-y-4">
-            {testCases.map((testCase, index) => (
-              <div
+            {testCases.map((testCase, index) => {
+              const parsedOutput = JSON.parse(outputJson[index]);
+              return (<div
                 key={index}
                 className="p-4 bg-[#16151C] rounded-lg flex space-x-14 items-center text-center"
               >
@@ -145,9 +302,13 @@ const CreateProblemForm: React.FC = () => {
                     {testCase[field]}
                   </p>
                 ))}
+                 <div className="flex flex-col">
+                  <h1 className="text-[#A2A1A8]">Output</h1>
+                  <p>{JSON.stringify(parsedOutput.output)}</p>
+                </div>
                 <button onClick={()=>removeTestCase(index)}>x</button>
               </div>
-            ))}
+            )})}
           </div>
         </div>
         </div>
@@ -155,8 +316,8 @@ const CreateProblemForm: React.FC = () => {
           <Button className="border border-[#A2A1A833] text-[white] bg-[#16151C]">
             Cancel
           </Button>
-          <Button className="text-[white] bg-[#7152F3] border-none">
-            Next
+          <Button onClick={handleSubmit} className="text-[white] bg-[#7152F3] border-none">
+            Create
           </Button>
         </div>
       </form>
@@ -166,7 +327,10 @@ const CreateProblemForm: React.FC = () => {
       }}
         title="Add Value"
         open={showModal}
-        onCancel={() => setShowModal(false)}
+        onCancel={() => {
+          resetModalState(); // Xóa giá trị
+          setShowModal(false); 
+        }}
         onOk={handleAddTestCase}
         className="custom-modal"
       >
@@ -179,6 +343,11 @@ const CreateProblemForm: React.FC = () => {
             />
           </div>
         ))}
+         <Input
+              placeholder="Output"
+              onChange={(e) => handleFieldChange("Output", e.target.value)}
+              className="p-2 rounded-lg bg-[#16151C] text-white"
+            />
       </Modal>
     </div>
   );

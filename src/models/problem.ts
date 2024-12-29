@@ -23,3 +23,14 @@ export interface SubmitReq {
     sourceCode: string;
     language: string;
 }
+
+export interface CreateProblemReq {
+    title: string,
+    explaination: string,
+    difficulty: number,
+    functionName: string,
+    returnType: string,
+    tags: string[];
+    input: string[];
+    output: string[];
+}
