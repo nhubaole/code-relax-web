@@ -5,3 +5,4 @@ export const SUBMISSION_ENDPOINT = "Submissions";
 export const AUT_ENDPOINT = "Authentication";
 export const USER_ENDPOINT = "User";
 export const PACKAGE_ENDPOINT = "Packages";
+export const ARTICLE_ENDPOINT = "Article";
