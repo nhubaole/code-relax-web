@@ -14,7 +14,6 @@ import { testCaseFormatter } from "../../../utils/formatter";
 import { generateInitialCode } from "../../../utils/helper";
 import ProblemService from "../../../services/ProblemService";
 import { toast } from "react-toastify";
-import { useLoader } from "../../../context/LoaderContext";
 
 type PlaygroundProps = {
   problem: ProblemRes;
@@ -34,8 +33,6 @@ const Playground = (prop: PlaygroundProps) => {
   const [activeTestCaseId, setActiveTestCaseId] = useState<number>(
     prop.testCases[0].id
   );
-  const loader = useLoader();
-  console.log(loader);
   const [fontSize] = useLocalStorage("lcc-fontSize", "14px");
 
   const [settings, setSettings] = useState<ISettings>({
@@ -83,7 +80,6 @@ const Playground = (prop: PlaygroundProps) => {
       languageMode = cpp();
   }
   const handleSubmit = async () => {
-    loader.start();
     const problemService = new ProblemService();
     const req: SubmitReq = {
       problemID: prop.problem.id,
@@ -91,20 +87,16 @@ const Playground = (prop: PlaygroundProps) => {
       language: selectedLanguage,
     };
     const response = await problemService.submit(req);
-    const data = response.data.data;
+    const data = response.data;
 
     if (data.statusCode === 0) {
-      loader.stop();
       toast.success("Congratulation, all testcases passed!");
-    }
-    if (data.statusCode !== 0) {
-      loader.stop();
+    }else  {
       toast.error(data.message);
     }
   };
 
   const handleRunCode = async () => {
-    loader.start();
     const problemService = new ProblemService();
     const req: SubmitReq = {
       problemID: prop.problem.id,
@@ -113,14 +105,11 @@ const Playground = (prop: PlaygroundProps) => {
     };
     const response = await problemService.runCode(req);
     const data = response.data;
-    console.log(data)
+    console.log(data.statusCode);
 
     if (data.statusCode === 0) {
-      loader.stop();
       toast.success("Congratulation, all testcases passed!");
-    }
-    if (data.statusCode !== 0) {
-      loader.stop();
+    }else {
       toast.error(data.message);
     }
   };

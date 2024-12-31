@@ -103,6 +103,7 @@ const CreateProblemForm: React.FC = () => {
     } catch (error: any) {
       toast.error(error.message);
     } finally {
+      
     }
   };
   const options: SelectProps['options'] = tags.map(tag => ({
@@ -115,56 +116,63 @@ const CreateProblemForm: React.FC = () => {
     setShowModal(true); // Hiển thị modal
   };
 
+  
   const resetModalState = () => {
     setCurrentParams({});
     setOutput([]); // Reset output
   };
+  
 
   const handleAddTestCase = () => {
-    setTestCases([...testCases, { ...currentParams }]); // Include the array of outputs
-
-    setCurrentParams({});
+    // Create a new test case with current parameters
+    const newTestCase = { ...currentParams };
+  
+    // Add the test case to the list
+    setTestCases([...testCases, newTestCase]);
+  
+    // Parse the output
     const transformedOutput = output.map((value) => {
-      // Attempt to parse the value if it's a string and looks like an array
       if (typeof value === "string" && value.startsWith("[") && value.endsWith("]")) {
         try {
-          value = JSON.parse(value); // Parse the string into an array
+          value = JSON.parse(value);
         } catch {
-          // If parsing fails, keep the value as is
           console.error("Failed to parse value:", value);
         }
       }
-    
+  
       switch (returnType) {
         case "string":
-          return `{"output": "${value}"}`; // Wrap value in quotes for string
+          return `{"output": "${value}"}`;
         case "int":
-          return `{"output": ${parseInt(value, 10)}}`; // Parse as integer
+          return `{"output": ${parseInt(value, 10)}}`;
         case "bool":
-          return `{output: ${value === "true"}}`; // Convert to boolean
+          return `{output: ${value === "true"}}`;
         case "list<string>":
           if (Array.isArray(value)) {
-            // If already an array, map each item as a string
             return `{"output": [${value.map((item) => `"${item}"`).join(", ")}]}`;
           } else {
-            // If comma-separated string, split and format as an array of strings
             return `{"output": [${value.split(",").map((item) => `"${item.trim()}"`).join(", ")}]}`;
           }
         case "list<int>":
           if (Array.isArray(value)) {
-            // If already an array, keep numbers as they are
             return `{"output": [${value.join(", ")}]}`;
           } else {
-            // If comma-separated string, split and format as an array of numbers
             return `{"output": [${value.split(",").map((item) => parseInt(item.trim(), 10)).join(", ")}]}`;
           }
         default:
           throw new Error("Invalid return type");
       }
     });
-    setOutputJson(transformedOutput);
+  
+    // Add the transformed output to the JSON array
+    setOutputJson([...outputJson, ...transformedOutput]);
+  
+    // Reset current parameters and hide modal
+    setCurrentParams({});
+    setOutput([]);
     setShowModal(false);
   };
+  
 
 
   const handleFieldChange = (field: string, value: string | number) => {

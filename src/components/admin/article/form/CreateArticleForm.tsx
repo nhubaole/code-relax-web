@@ -10,15 +10,7 @@ const CreateArticleForm: React.FC = () => {
   const [fieldValues, setFieldValues] = useState<{ [key: string]: string }>({});
 
 
-  const handleAddTestCase = () => {
-    setTestCases([...testCases, currentParams]);
-    setCurrentParams({});
-    setShowModal(false);
-  };
 
-  const handleFieldChange = (field: string, value: string | number) => {
-    setCurrentParams({ ...currentParams, [field]: value });
-  };
 
   const addField = () => {
     setTestCaseFields([...testCaseFields, `Param ${testCaseFields.length + 1}`]);

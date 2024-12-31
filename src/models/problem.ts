@@ -6,6 +6,7 @@ export interface ProblemRes {
     numOfAcceptance: number,
     numOfSubmission: number,
     functionName: string,
+    tag: string[],
     returnType: string,
     createdAt: Date
 }

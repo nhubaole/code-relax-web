@@ -30,6 +30,7 @@ const Workspace = (prop: WorkspaceProps) => {
     difficulty: 1,
     functionName: "",
     returnType: "",
+    tag: [],
     createdAt: new Date(),
   });
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -45,14 +46,14 @@ const Workspace = (prop: WorkspaceProps) => {
     const fetchProblem = async () => {
       const problemService = new ProblemService();
 
-      const response = await problemService.getByID(1);
+      const response = await problemService.getByID(18);
       const data = response.data;
       setProblem(data.data);
     };
     const fetchTestCase = async () => {
       const problemService = new ProblemService();
 
-      const response = await problemService.getTestCaseByProblem(1);
+      const response = await problemService.getTestCaseByProblem(18);
       const data = response.data;
       setTestCases(data.data);
     };

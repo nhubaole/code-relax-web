@@ -15,6 +15,7 @@ import { useState } from "react";
 import Home from "./components/home/Home";
 import Workspace from "./components/workspace/Workspace";
 import Admin from "./pages/admin";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -63,6 +64,7 @@ function App() {
   return (
     <Router>
       <Layout />
+      <ToastContainer />
     </Router>
   );
 }

@@ -8,7 +8,7 @@ const AllProblemPage = () => {
     <div className="h-screen text-[white]">
       <SearchBar />
       <ProblemTable />
-      <Pagination  className="text-gray"/>
+      <Pagination className="text-gray" defaultCurrent={1} total={50} onChange={(page) => console.log(page)} />
     </div>
   );
 };

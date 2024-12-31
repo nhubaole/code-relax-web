@@ -42,6 +42,8 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     link: false,
   });
 
+  console.log(prop.problem)
+
   const toggleEffect = (effect: keyof typeof effects) => {
     setEffects((prev) => ({
       ...prev,
@@ -49,7 +51,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     }));
   };
 
-  const tags = ["Dynamic Programing", "Array"];
   const testCasesRes = testCaseFormatter(prop.testCases);
   const acceptanceRate =
     prop.problem.numOfSubmission === 0
@@ -150,10 +151,10 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
         <div className="px-5">
           <div className="break-all">
             <div className="flex space-x-4 items-center justify-between">
-              <div className="flex mr-32 text-[#FFF] space-x-3">
-                {prop.problem.difficulty === 1 ? (
+              <div className="flex mr-32 text-[#FFF] items-center space-x-3">
+                {prop.problem.difficulty === 0 ? (
                   <EasyTag />
-                ) : prop.problem.difficulty === 2 ? (
+                ) : prop.problem.difficulty === 1 ? (
                   <MediumTag />
                 ) : (
                   <HardTag />
@@ -165,7 +166,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
             <div className="flex mt-4 items-center space-x-2">
               <img src={tag} alt="" />
               <h1 className="text-gray font-medium">TAGS</h1>
-              {tags.map((value) => (
+              {prop.problem.tag.map((value) => (
                 <ProblemTag name={value} />
               ))}
             </div>
