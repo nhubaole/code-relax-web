@@ -53,8 +53,10 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
     onLogoutSuccess();
   };
 
+
   return (
-    <div className="relative flex flex-col min-h-screen bg-gradient-to-tl from-green-500 to-textcolorlight">
+    <div>
+      <div className="relative flex flex-col min-h-screen bg-gradient-to-tl from-green-500 to-textcolorlight">
       <div className="flex flex-grow p-2 mt-28">
         {/* Sidebar */}
         <div className="flex-none px-10 w-72">
@@ -89,6 +91,64 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
             {currentUser?.displayName}
           </h2>
 
+          {/* Navigation Buttons */}
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={() => setActiveDiv("account")}
+              className={`w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600 ${
+                activeDiv === "account" ? "bg-green-500" : ""
+              }`}
+            >
+              <img
+                src={account}
+                alt="Account Icon"
+                className="inline w-5 h-5 mr-3"
+              />
+              Account
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveDiv("points")}
+              className={`w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600 ${
+                activeDiv === "points" ? "bg-green-500" : ""
+              }`}
+            >
+              <img
+                src={points}
+                alt="Points Icon"
+                className="inline w-5 h-5 mr-3"
+              />
+              Points
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveDiv("practice_history")}
+              className={`w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600 ${
+                activeDiv === "practice_history" ? "bg-green-500" : ""
+              }`}
+            >
+              <img
+                src={practice_history}
+                alt="Practice History Icon"
+                className="inline w-5 h-5 mr-3"
+              />
+              Practice History
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600"
+            >
+              <img
+                src={logout}
+                alt="Logout Icon"
+                className="inline w-5 h-5 mr-3"
+              />
+              Log Out
+            </button>
+          </div>
+        </div>
           {/* Navigation Buttons */}
           <div className="space-y-4">
             <button

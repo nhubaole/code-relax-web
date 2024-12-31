@@ -8,7 +8,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import SignUp from "./components/auth/SignUp";
-import Profile from "./components/profile/Profile";
 import Navbar from "./components/home/Navbar";
 import Problems from "./components/problems/Problems";
 import { useEffect, useState } from "react";
@@ -18,6 +17,7 @@ import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
+import Profile from "./components/profile/Profile";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,43 +39,28 @@ function App() {
     localStorage.removeItem("isLoggedIn");
   };
 
+
   const Layout = () => {
     const location = useLocation();
+  }
 
-    return (
-      <> 
-        <Routes>
-          <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-          <Route path="/problems" element={<Problems />} />
-          <Route path="/workspace" element={<Workspace problemId={1} />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/detailexplore" element={<DetailExplore isLoggedIn={isLoggedIn}/>} />
-          <Route path="/leaderboard" element={<LeaderBoard isLoggedIn={isLoggedIn}/>}/>
-          <Route
-            path="/login"
-            element={<LogIn onLoginSuccess={handleLoginSuccess} />}
-          />
-          <Route path="/signup" element={<SignUp />} />
-          <Route
-            path="/profile"
-            element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
-          />
-        </Routes>
-        {location.pathname !== "/workspace" && (
-          <div className="absolute top-0 left-0 w-full">           
-              <Navbar isLoggedIn={isLoggedIn} />            
-          </div>
-        )}
-      </>
-    );
-  };
+  return (    
+    <Router>     
+      <Routes>
+        <Route path="/" element={<Home isLoggedIn/>} />
+        <Route path="/problems" element={<Problems />} />
+        <Route path="/explore" element={<Profile onLogoutSuccess={handleLogoutSuccess}/>} />
+        {/* <Route path="/community" element={<Community />} /> */}
+        {/* <Route path="/leaderboard" element={<Leaderboard />} /> */}
+        <Route path="/login" element={<LogIn onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile onLogoutSuccess={handleLogoutSuccess} />} />
+      </Routes>    
 
-  return (
-      <Router>
-        <Layout />
-        <ToastContainer />
-      </Router>
-    
+      <div className="absolute top-0 left-0 w-full">
+        <Navbar isLoggedIn={isLoggedIn} />
+      </div> 
+    </Router>
   );
 }
 
