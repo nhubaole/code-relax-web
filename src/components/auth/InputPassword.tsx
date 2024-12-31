@@ -2,7 +2,8 @@ import { useState } from 'react';
 import eye_disable from "../../assets/eye-disable.svg";
 import eye from "../../assets/eye.svg";
 
-const PasswordInput = ({ placeholder = "Password",  onChange }) => {
+const PasswordInput = ({placeholder = "Password", value, onChange, } 
+  : { placeholder?: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;  }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => { setShowPassword(!showPassword); };
@@ -14,6 +15,7 @@ const PasswordInput = ({ placeholder = "Password",  onChange }) => {
         className="w-full px-4 py-3 bg-[#FFFFFF] bg-opacity-0 border border-[#FFFFFF] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#FFFFFF] placeholder-[#FFFFFF] text-[#FFFFFF]"
         placeholder={placeholder}
         onChange={onChange} 
+        value={value}
         required
       />
       <button
