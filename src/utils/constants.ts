@@ -4,3 +4,4 @@ export const DISCUSSION_ENDPOINT = "Discussions";
 export const SUBMISSION_ENDPOINT = "Submissions";
 export const TAG_ENDPOINT = "Tags";
 export const ARTICLE_ENDPOINT = "Articles";
+export const RATING_ENDPOINT = "Ratings";

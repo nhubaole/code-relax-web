@@ -18,6 +18,8 @@ import { useEffect, useState } from "react";
 import { DiscussionRes } from "../../../models/discussion";
 import DiscussionService from "../../../services/DiscussionService";
 import { toast } from "react-toastify";
+import { RatingRes } from "../../../models/rating";
+import RatingService from "../../../services/RatingService";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -34,6 +36,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
   const [newDiscussion, setNewDiscussion] = useState("");
+  const [rating, setRating] = useState<RatingRes[]>([]);
 
   const [effects, setEffects] = useState({
     bold: false,
@@ -42,7 +45,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     link: false,
   });
 
-  console.log(prop.problem)
+  console.log(prop.problem);
 
   const toggleEffect = (effect: keyof typeof effects) => {
     setEffects((prev) => ({
@@ -65,7 +68,18 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       setDiscussions(data);
     };
     fetchdiscussion();
-  }, [prop.problem.id]);
+  }, []);
+
+  useEffect(() => {
+    const fetchRating = async (id:number) => {
+      console.log(prop.problem.id);
+      const ratingService = new RatingService();
+      const response = await ratingService.getByProblemID(id);
+      const data = response.data.data;
+      setRating(data);
+    };
+    fetchRating(prop.problem.id);
+  },[]);
 
   const handleCreateDiscussion = async () => {
     if (!newDiscussion.trim()) {
@@ -109,15 +123,20 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       );
     }
   };
+  console.log(rating);
+  const totalStars = rating.reduce((acc, curr) => acc + curr.numberOfStar, 0);
+  const totalReviews = rating.length;
+  const overall = totalReviews === 0 ? 0 : totalStars / totalReviews;
+
   const ratings = {
-    overall: 4.5,
-    totalReviews: 653,
+    overall: overall.toFixed(1),
+    totalReviews: totalReviews,
     breakdown: {
-      5: 80,
-      4: 60,
-      3: 40,
-      2: 20,
-      1: 10,
+      5: rating.filter((r) => r.numberOfStar === 5).length,
+      4: rating.filter((r) => r.numberOfStar === 4).length,
+      3: rating.filter((r) => r.numberOfStar === 3).length,
+      2: rating.filter((r) => r.numberOfStar === 2).length,
+      1: rating.filter((r) => r.numberOfStar === 1).length,
     },
   };
 
@@ -129,10 +148,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
           className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
             prop.tab === "description" ? "text-green-300" : "text-gray"
           } cursor-pointer`}
-          onClick={
-            () => prop.onTabChange("description")
-           
-          }
+          onClick={() => prop.onTabChange("description")}
         >
           Description
         </div>
