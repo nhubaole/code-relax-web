@@ -11,7 +11,7 @@ import icstatus from "../../assets/status.svg"
 import star from "../../assets/Star.svg"
 import search from "../../assets/search.svg"
 import PackageService from "../../services/PackageService";
-import { Package, ProblemInfor } from "../../models/package";
+import { Package, ProblemInfor, Tag } from "../../models/package";
 
 const PackageTag = ({ content }: { content: string }) => {
     return (
@@ -28,20 +28,17 @@ const PackageTag = ({ content }: { content: string }) => {
 
 const DivPackage: React.FC <{
     content: string; 
-    update_At: Date; 
+    updateAgo: string; 
     numberParticipants: number; 
     levels: string[];
     icon: string;
-    color: string; }> = ({ content, update_At, numberParticipants, levels, icon, color }) => {
-    const timeDifference = new Date().getTime() - update_At.getTime(); 
-    const daysAgo = Math.floor(timeDifference / (1000 * 3600 * 24)); 
-    const displayText = daysAgo > 30 ? 
-        `Updated ${Math.floor(daysAgo / 30)} month${Math.floor(daysAgo / 30) > 1 ? 's' : ''} ago` :
-        `Updated ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
-        
-
+    color: string; 
+    onClick?: () => void; }> = ({ content, updateAgo, numberParticipants, levels, icon, color, onClick }) => {
     return (
-        <div className={`bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl flex-none flex flex-col w-[305px] mt-6 border-l-[6px]`} style={{borderColor: color }}>
+        <button 
+        className={`bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl flex-none flex flex-col w-[305px] mt-6 border-l-[6px]`} 
+        style={{borderColor: color }}
+        onClick={onClick} >
             <div className="flex items-center flex-none w-full">
                 <img
                     className="flex-none object-cover w-10 h-10"
@@ -50,7 +47,7 @@ const DivPackage: React.FC <{
                 />
                 <div className="flex flex-col ml-2">
                     <span className="font-bold text-left text-[#FFFFFF]">{content}</span>
-                    <span className="text-xs text-left text-[#FFFFFF]">{displayText}</span>
+                    <span className="text-xs text-left text-[#FFFFFF]">{updateAgo}</span>
                 </div>
                 <button
                     type="button"
@@ -58,7 +55,7 @@ const DivPackage: React.FC <{
                     <label htmlFor="fileInput" className="cursor-pointer">
                         <img src={send} alt="Icon" className="w-6 h-6"/>
                     </label>
-                </button>      
+                </button>       
             </div>
 
             <div className="flex py-5 overflow-x-auto hide-scrollbar">
@@ -69,11 +66,11 @@ const DivPackage: React.FC <{
                 ))}
             </div>
 
-            <div className="flex flex-none">
+            <div className="flex flex-none mt-auto mb-0">
                 <span className="text-3xl mt-auto text-left text-[#FFFFFF]">{numberParticipants}</span>
                 <span className="mt-auto mb-1 px-1 text-xs text-left text-[#FFFFFF]">participants</span>
             </div>
-        </div>
+        </button>
     );
 };
 
@@ -144,8 +141,10 @@ const SearchTag = ({ content, onSelect, isSelected }: {
 const Problems = () => {
     const [packages, setPackages] = useState<Package[]>([]);
     const [problems, setProblems] = useState<ProblemInfor[]>([]);
-    const [originalProblems, setOriginalProblems] = useState<ProblemInfor[]>(problems);
+    const [originalProblems, setOriginalProblems] = useState<ProblemInfor[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [pkName, setPkName] = useState<string>('All Problems');
     const [filters, setFilters] = useState({
         textSearch: '',
         tag: [] as string[],
@@ -154,28 +153,39 @@ const Problems = () => {
       });
 
     useEffect(() => {
-        // const fetchPackages = async () => {
-        //   try {
-        //     const data = await PackageService.getPackages();
-        //     setPackages(data); 
-        //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        //   } catch (error) {
-        //     console.log(error);
-        //   } 
-        // };
+        const fetchPackages = async () => {
+            try {
+                const data = await PackageService.getPackages();
+                setPackages(data); 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+                console.log(error);
+            } 
+        };
+
+        const fetchTags = async () => {
+            try {
+                const data = await PackageService.getTags();
+                setTags(data); 
+                console.log(data);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+                console.log(error);
+            } 
+        };
 
         const fetchAllProblems = async () => {
             try {
                 const data = await PackageService.getAllProblem();
-                setOriginalProblems(data); 
-                console.log("data:",data);
-                console.log("origin: ",originalProblems);               
+                setOriginalProblems(data);               
                 setProblems(data);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
               console.log(error);
             } 
-          };
+          };       
+        fetchTags();        
+        fetchPackages();
         fetchAllProblems();
         handleFilterChange();
     }, []);
@@ -183,6 +193,18 @@ const Problems = () => {
     useEffect(() => {
         handleFilterChange();
     }, [filters]);
+
+    const fetchProblemsById = async (pkgId: number, pkgName: string) => {
+        try {
+            const data = await PackageService.getProblemsById(pkgId);
+            setOriginalProblems(data);               
+            setProblems(data);
+            setPkName(pkgName)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          console.log(error);
+        } 
+    };
     
     const handleSort = (field: keyof ProblemInfor) => {
         const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
@@ -218,14 +240,10 @@ const Problems = () => {
                 problem.title.toLowerCase().includes(textSearch.toLowerCase())
             );
         }
-        // if (tag) {
-        //     filteredProblems = filteredProblems.filter(problem =>
-        //         problem.title.toLowerCase().includes(tag.toLowerCase())
-        //     );
-        // }
-        if (tag && tag.length > 0) {
+        if (tag && Array.isArray(tag) && tag.length > 0) {
             filteredProblems = filteredProblems.filter(problem =>
-                tag.every(filterTag => 
+                Array.isArray(problem.tag) && 
+                tag.every(filterTag =>
                     problem.tag.some(t => t.toLowerCase() === filterTag.toLowerCase())
                 )
             );
@@ -239,19 +257,12 @@ const Problems = () => {
         setProblems(filteredProblems);
     };    
 
-    // const handleTagSelect = (content: string) => {
-    //     setFilters(prevFilters => ({
-    //       ...prevFilters,
-    //       tag: prevFilters.tag === content ? '' : content,  // Nếu tag đã chọn trước đó thì bỏ chọn
-    //     }));
-    //   };
-      
     const handleTagSelect = (content: string) => {
         setFilters(prevFilters => ({
             ...prevFilters,
-            tag: prevFilters.tag.includes(content) // Kiểm tra xem tag đã tồn tại trong mảng chưa
-                ? prevFilters.tag.filter(tag => tag !== content) // Nếu có thì loại bỏ
-                : [...prevFilters.tag, content] // Nếu chưa có thì thêm vào
+            tag: prevFilters.tag.includes(content)
+                ? prevFilters.tag.filter(tag => tag !== content)
+                : [...prevFilters.tag, content]
         }));
     };
 
@@ -279,11 +290,12 @@ const Problems = () => {
                             <DivPackage
                                 key={index}
                                 content={pkg.content}
-                                update_At = {new Date(pkg.update_At)}
+                                updateAgo = {pkg.updatedAgo}
                                 numberParticipants={pkg.numberParticipants}
                                 levels={pkg.levels}
                                 icon={icons[index % icons.length]} 
                                 color={colors[index % colors.length]}
+                                onClick={() => fetchProblemsById(pkg.id, pkg.content)}
                             />
                         ))}
                     </div>
@@ -291,7 +303,7 @@ const Problems = () => {
                 </div>
 
                 <div className="flex-grow mt-10 mr-7">
-                    <h1 className="text-left text-xl font-bold text-[#FFFFFF] mb-4 ">All Problems</h1>   
+                    <h1 className="text-left text-xl font-bold text-[#FFFFFF] mb-4 ">{pkName}</h1>   
                     <div className="flex min-w-screen space-x-7">
                         <div className="bg-[#ffffff] flex-none w-3/5 bg-opacity-10 px-4 py-4 rounded-xl shadow-2xl flex-col space-y-3">
                             <div className="bg-[#ffffff] flex bg-opacity-10 px-4 py-1 rounded shadow-2xl">
@@ -329,7 +341,8 @@ const Problems = () => {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col overflow-y-auto max-h-[680px]">
+                            <div className="flex flex-col overflow-y-auto max-h-[680px]"
+                            onClick={() => console.log('Div clicked!')}>
                                 {problems.map((problem, index) => (
                                     <Problem 
                                         key={index} 
@@ -368,9 +381,9 @@ const Problems = () => {
                                     {tags.map((tag, index) => (
                                         <div className="mb-2" key={index}>
                                             <SearchTag 
-                                                content={tag} 
+                                                content={tag.name} 
                                                 onSelect={handleTagSelect}
-                                                isSelected={filters.tag.includes(tag)}
+                                                isSelected={filters.tag.includes(tag.name)}
                                             />
                                         </div>
                                     ))}
@@ -429,8 +442,6 @@ const Problems = () => {
                                 </div>
                             </div>
                         </div>    
-
-                         
                     </div>
                 </div>
             </div>            
@@ -441,5 +452,5 @@ const Problems = () => {
 
 const colors = ["#8B79F1", "#DF4A52", "#F4AB04", "#1CE496"];
 const icons = [package1, package2, package3, package4];
-const tags = ["Array", "String", "Sorting", "Dynamic Programming", "Math", "Hash Table", "Hash Map"];
+// const tag = ["Array", "String", "Sorting", "Dynamic Programming", "Math", "Hash Map"];
 export default Problems;

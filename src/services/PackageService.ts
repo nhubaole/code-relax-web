@@ -6,12 +6,17 @@ export default class PackageService {
 
   static async getPackages() {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5205/api/Package', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch('http://localhost:5205/api/Package');
+      const res = await response.json();
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getTags() {
+    try {
+      const response = await fetch('http://localhost:5205/api/v1/Tags');
       const res = await response.json();
       return res.data;
     } catch (error) {
@@ -21,7 +26,7 @@ export default class PackageService {
 
   static async getAllProblem() {
     const url = PROBLEM_ENDPOINT;
-    // try {
+    try {
       const token = localStorage.getItem('token');
       const res = await apiClient.get(url, {
         headers: {
@@ -29,9 +34,21 @@ export default class PackageService {
         },
       });
       return res.data?.data;
-    // } catch (error) {
-    //     console.error("Failed to update user:", error);
-    //     throw error;
-    // }
+    } catch (error) {
+        console.error("Failed to update user:", error);
+        throw error;
+    }
   }  
+  
+  static async getProblemsById(id: number) {
+    try {
+        const response = await fetch(`http://localhost:5205/api/Package/${id}/problems`);
+        const res = await response.json();
+        return res.data;
+    } catch (error) {
+        console.error("Failed to fetch problems:", error);
+        throw error;
+    }
+}
+
 }
