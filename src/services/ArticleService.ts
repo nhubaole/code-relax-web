@@ -1,6 +1,6 @@
 import { CreateProblemReq } from "../models/problem";
 import { apiClient } from "../utils/apiClient";
-import { ARTICLE_ENDPOINT } from "../utils/constants";
+import { ARTICLE_ENDPOINT, QUIZ_ENDPOINT } from "../utils/constants";
 
 export default  class ArticleService {
     constructor(){}
@@ -27,6 +27,39 @@ export default  class ArticleService {
         throw error;
       }
   }
+  async create(req: any, token: string| null) {
+    const url = ARTICLE_ENDPOINT;
+
+  
+    try {
+      const res = await apiClient.post(url, req, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data', 
+          },
+      });
+      return res;
+    } catch (error) {
+      throw error;
+    }
+}
+
+async createQuiz(req: any, token: string| null) {
+  const url = QUIZ_ENDPOINT;
+
+  try {
+    const res = await apiClient.post(url, req, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+    });
+    return res;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
     
 
     async createProblem(req: CreateProblemReq){

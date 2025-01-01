@@ -10,3 +10,4 @@ export const PACKAGE_ENDPOINT = "Packages";
 export const ARTICLE_ENDPOINT = "Article";
 export const USER_DEFAULT_AVATAR =
   "https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png";
+export const QUIZ_ENDPOINT = "Quiz";
