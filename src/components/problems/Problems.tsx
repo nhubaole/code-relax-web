@@ -1,6 +1,6 @@
 import Footer from "../profile/Footer";
 import send from "../../assets/send.svg";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import school from "../../assets/school_white.svg";
 import package1 from "../../assets/data_structure.svg";
 import package2 from "../../assets/algorithms.svg";
@@ -10,6 +10,11 @@ import arrange from "../../assets/arrange.svg"
 import icstatus from "../../assets/status.svg"
 import star from "../../assets/Star.svg"
 import search from "../../assets/search.svg"
+import PackageService from "../../services/PackageService";
+import { Package } from "../../models/package";
+import { ProblemRes } from "../../models/problem";
+import { useNavigate } from "react-router-dom";
+import ProblemService from "../../services/ProblemService";
 
 const PackageTag = ({ content }: { content: string }) => {
     return (
@@ -24,21 +29,22 @@ const PackageTag = ({ content }: { content: string }) => {
     );
 };
 
-const Package: React.FC <{
-    name: string; 
-    last_update: Date; 
-    participants: number; 
-    tags: string[]; 
+const DivPackage: React.FC <{
+    content: string; 
+    update_At: Date; 
+    numberParticipants: number; 
+    levels: string[];
     icon: string;
-    color: string; }> = ({ name, last_update, participants, tags, icon, color }) => {
-    const timeDifference = new Date().getTime() - last_update.getTime(); 
+    color: string; }> = ({ content, update_At, numberParticipants, levels, icon, color }) => {
+    const timeDifference = new Date().getTime() - update_At.getTime(); 
     const daysAgo = Math.floor(timeDifference / (1000 * 3600 * 24)); 
     const displayText = daysAgo > 30 ? 
         `Updated ${Math.floor(daysAgo / 30)} month${Math.floor(daysAgo / 30) > 1 ? 's' : ''} ago` :
         `Updated ${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`;
+        
 
     return (
-        <div className={`bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl shadow-2xl flex flex-col w-96 mt-6 border-l-[6px]`} style={{ borderColor: color }}> {/* Thay đổi màu border */}
+        <div className={`bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl flex-none flex flex-col w-[305px] mt-6 border-l-[6px]`} style={{borderColor: color }}>
             <div className="flex items-center flex-none w-full">
                 <img
                     className="flex-none object-cover w-10 h-10"
@@ -46,7 +52,7 @@ const Package: React.FC <{
                     alt="icon"
                 />
                 <div className="flex flex-col ml-2">
-                    <span className="font-bold text-left text-[#FFFFFF]">{name}</span>
+                    <span className="font-bold text-left text-[#FFFFFF]">{content}</span>
                     <span className="text-xs text-left text-[#FFFFFF]">{displayText}</span>
                 </div>
                 <button
@@ -59,7 +65,7 @@ const Package: React.FC <{
             </div>
 
             <div className="flex py-5 overflow-x-auto hide-scrollbar">
-                {tags.map((tag, index) => (
+                {levels.map((tag, index) => (
                     <div className="mr-2" key={index}>
                         <PackageTag content={tag} />
                     </div>
@@ -67,7 +73,7 @@ const Package: React.FC <{
             </div>
 
             <div className="flex flex-none">
-                <span className="text-3xl mt-auto text-left text-[#FFFFFF]">{participants}</span>
+                <span className="text-3xl mt-auto text-left text-[#FFFFFF]">{numberParticipants}</span>
                 <span className="mt-auto mb-1 px-1 text-xs text-left text-[#FFFFFF]">participants</span>
             </div>
         </div>
@@ -75,14 +81,20 @@ const Package: React.FC <{
 };
 
 const Problem: React.FC <{
+    id: number
     status: boolean; 
     title: string; 
     rating: number; 
-    difficulty: string; 
-    acceptance: number;  }> = ({ status, title, rating, difficulty, acceptance }) => {
+    difficulty: number; 
+    acceptance: number;  }> = ({ id, status, title, rating, difficulty, acceptance }) => {
+    
+    const navigate = useNavigate()
+    const handleProblemClick = () => {
+        navigate("/workspace", {state: {problemId: id}})
+    }
     
     return (
-        <div className="flex w-full px-4 py-4 border-b border-blacklight">
+        <div onClick={handleProblemClick} className="flex w-full px-4 py-4 border-b border-blacklight cursor-pointer">
             <div className="flex flex-1">
                 {status && (
                     <img
@@ -106,12 +118,12 @@ const Problem: React.FC <{
             <div className="flex-1">
                 <span 
                     className={`text-left ${
-                        difficulty === 'Hard' ? 'text-red' : 
-                        difficulty === 'Medium' ? 'text-yellow-300' : 
-                        'text-green-300'
+                        difficulty === 2 ? 'text-red-500' : 
+                        difficulty === 1 ? 'text-yellow-300' :
+                        'text-green-300' 
                     }`}
                 >
-                    {difficulty}
+                    {difficulty === 2 ? 'Hard' : difficulty === 1 ? 'Medium' : 'Easy'}
                 </span>
             </div>
 
@@ -143,6 +155,37 @@ const Problems = () => {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+    const [packages, setPackages] = useState<Package[]>([]);
+    const [problems, setProblems] = useState<ProblemRes[]>([]);
+
+    const token = localStorage.getItem('token');
+    useEffect(() => {
+        const fetchPackages = async () => {
+          try {
+            const data = await PackageService.getPackages();
+            setPackages(data); 
+            console.log('package',data);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (error) {
+            console.log(error);
+          } 
+        };
+
+        const fetchProblems = async () => {
+            try {
+              const problemService = new ProblemService();
+              const data = await problemService.getAll(token);
+              setProblems(data.data.data); 
+              console.log('problem',data);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (error) {
+              console.log(error);
+            } 
+          };
+    
+        fetchPackages();
+        fetchProblems();
+    }, []);
 
     const handleTagSelect = (content: string) => {
         setSelectedTags(prev => {
@@ -153,7 +196,7 @@ const Problems = () => {
             }
         });
     };
-
+    
     const handleCheckboxChange = (value: string) => {
         setSelectedStatus(prev => (prev === value ? null : value));
     };
@@ -167,40 +210,20 @@ const Problems = () => {
             <div className="flex-col flex-grow px-16 py-2 mt-28">
                 <div className="flex-grow ">
                     <h1 className="text-xl font-bold text-left text-[#FFFFFF]">Package</h1> 
-                    <div className="flex space-x-7">
-                        <Package
-                            name="Data Structures"
-                            last_update={new Date('2024-10-20')}
-                            participants={45}
-                            tags={["Beginner"]} 
-                            icon={package1}
-                            color="#8B79F1"
-                        />
-                        <Package
-                            name="Algorithms"
-                            last_update={new Date('2024-11-01')}
-                            participants={38}
-                            tags={["Beginner"]} 
-                            icon={package2}
-                            color="#DF4A52"
-                        />
-                        <Package
-                            name="Problems Solving"
-                            last_update={new Date('2024-9-3')}
-                            participants={25}
-                            tags={["Beginner", "Intermediate"]} 
-                            icon={package3}
-                            color="#F4AB04"
-                        />
-                        <Package
-                            name="Top Interview"
-                            last_update={new Date('2024-10-12')}
-                            participants={105}
-                            tags={["Intermediate", "Advanced"]} 
-                            icon={package4}
-                            color="#1CE496"
-                        />
+                    <div className="flex overflow-x-auto space-x-7 whitespace-nowrap scrollbar-hide">
+                        {packages.map((pkg, index) => (
+                            <DivPackage
+                                key={index}
+                                content={pkg.content}
+                                update_At = {new Date(pkg.update_At)}
+                                numberParticipants={pkg.numberParticipants}
+                                levels={pkg.levels}
+                                icon={icons[index % icons.length]} 
+                                color={colors[index % colors.length]}
+                            />
+                        ))}
                     </div>
+
                 </div>
 
                 <div className="flex-grow mt-10 mr-7">
@@ -240,11 +263,12 @@ const Problems = () => {
                                 {problems.map((problem, index) => (
                                     <Problem 
                                         key={index} 
-                                        status={problem.status}  
+                                        id={problem.id}
+                                        status={false}  
                                         title={problem.title} 
-                                        rating={problem.rating}  
+                                        rating={5}  
                                         difficulty={problem.difficulty} 
-                                        acceptance={problem.acceptance} 
+                                        acceptance={problem.numOfAcceptance} 
                                     />
                                 ))}
                             </div>
@@ -342,20 +366,23 @@ const Problems = () => {
     );
 };
 
-const problems = [
-    { status: true, title: "Solve Me First", rating: 4.0, difficulty: "Easy", acceptance: 53.8 },
-    { status: false, title: "Simple Array Sum", rating: 3.5, difficulty: "Medium", acceptance: 41.1 },
-    { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: "Medium", acceptance: 34.5 },
-    { status: false, title: "Reverse Integer", rating: 4.5, difficulty: "Hard", acceptance: 29.2 },
-    { status: false, title: "Integer to Roman", rating: 5.0, difficulty: "Easy", acceptance: 56.2 },
-    { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: "Easy", acceptance: 66.3 },
-    { status: true, title: "Solve Me First", rating: 4.0, difficulty: "Easy", acceptance: 53.8 },
-    { status: false, title: "Simple Array Sum", rating: 3.5, difficulty: "Medium", acceptance: 41.1 },
-    { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: "Medium", acceptance: 34.5 },
-    { status: false, title: "Reverse Integer", rating: 4.5, difficulty: "Hard", acceptance: 29.2 },
-    { status: false, title: "Integer to Roman", rating: 5.0, difficulty: "Easy", acceptance: 56.2 },
-    { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: "Easy", acceptance: 66.3 },
-];
+const colors = ["#8B79F1", "#DF4A52", "#F4AB04", "#1CE496"];
+const icons = [package1, package2, package3, package4];
+
+// const problems = [
+//     { status: true, title: "Solve Me First", rating: 4.0, difficulty: "Easy", acceptance: 53.8 },
+//     { status: false, title: "Simple Array Sum", rating: 3.5, difficulty: "Medium", acceptance: 41.1 },
+//     { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: "Medium", acceptance: 34.5 },
+//     { status: false, title: "Reverse Integer", rating: 4.5, difficulty: "Hard", acceptance: 29.2 },
+//     { status: false, title: "Integer to Roman", rating: 5.0, difficulty: "Easy", acceptance: 56.2 },
+//     { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: "Easy", acceptance: 66.3 },
+//     { status: true, title: "Solve Me First", rating: 4.0, difficulty: "Easy", acceptance: 53.8 },
+//     { status: false, title: "Simple Array Sum", rating: 3.5, difficulty: "Medium", acceptance: 41.1 },
+//     { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: "Medium", acceptance: 34.5 },
+//     { status: false, title: "Reverse Integer", rating: 4.5, difficulty: "Hard", acceptance: 29.2 },
+//     { status: false, title: "Integer to Roman", rating: 5.0, difficulty: "Easy", acceptance: 56.2 },
+//     { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: "Easy", acceptance: 66.3 },
+// ];
 
 const tags = ["Array", "String", "Sorting", "Math", "Dynamic Programming", "Hash Table", "Array", "String", "Sorting", "Math", "Dynamic Programming", "Hash Table"];
 

@@ -8,6 +8,8 @@ export interface ProblemRes {
     functionName: string,
     tag: string[],
     returnType: string,
+    isSolved: boolean,
+    avarageRating: number,
     createdAt: Date
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import avatar from "../../assets/avatar.jpg";
 import account from "../../assets/user-rectangle.svg";
@@ -10,16 +10,35 @@ import DivAccount from "./Account";
 import DivPoints from "./Points";
 import Footer from "./Footer";
 import PracticeHistory from "./PracticeHistory";
-import MyProblem from "./MyProblem";
+import UserService from '../../services/UserService';
+import { UserInfo } from '../../models/user';
 
 interface ProfileProps {
   onLogoutSuccess: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
-  const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history"| "myproblem">("account");
+  const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history">("account");
   const [selectedImage, setSelectedImage] = useState<string>(avatar);
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
+
+  const getCurrentUser = async () => {
+    try {
+    const user = await UserService.getCurrentUser();
+    setCurrentUser(user); 
+    } catch (error) {
+    console.error("Failed to fetch current user:", error);
+    }
+  };
+
+  useEffect(() => {    
+    getCurrentUser();
+  }, []); 
+
+  const onUpdateSuccess = async () => {
+    getCurrentUser();
+  };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -28,6 +47,7 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
       setSelectedImage(imageUrl);
     }
   };
+
 
   const handleLogout = () => {
     navigate("/");
@@ -67,7 +87,7 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
           </div>
 
           <h2 className="text-3xl text-center text-[#FFFFFF] mb-10 mt-4">
-            Ha Anh
+            {currentUser?.displayName}
           </h2>
 
           {/* Navigation Buttons */}
@@ -116,20 +136,6 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
             </button>
             <button
               type="button"
-              onClick={() => setActiveDiv("myproblem")}
-              className={`w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600 ${
-                activeDiv === "myproblem" ? "bg-green-500" : ""
-              }`}
-            >
-              <img
-                src={account}
-                alt="Account Icon"
-                className="inline w-5 h-5 mr-3"
-              />
-              My Problem
-            </button>
-            <button
-              type="button"
               onClick={handleLogout}
               className="w-full text-left py-3 px-6 text-[#FFFFFF] transition duration-200 rounded-md hover:bg-green-600"
             >
@@ -146,13 +152,11 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
         {/* Content Area */}
         <div className="flex-1">
           {activeDiv === "account" ? (
-            <DivAccount />
+            <DivAccount currentUser={currentUser} onUpdateSuccess={onUpdateSuccess} />
           ) : activeDiv === "points" ? (
             <DivPoints />
-          ) : activeDiv === "practice_history" ? (
-            <PracticeHistory />
           ) : (
-            <MyProblem/>
+            <PracticeHistory />
           )}
         </div>
       </div>

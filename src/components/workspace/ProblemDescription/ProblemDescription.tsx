@@ -31,12 +31,13 @@ type ProblemDescriptionProps = {
 const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [isRatingsOpen, setIsRatingsOpen] = useState(false);
-
+  const token = localStorage.getItem('token');
   const toggleDiscussion = () => setIsDiscussionOpen(!isDiscussionOpen);
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
   const [newDiscussion, setNewDiscussion] = useState("");
   const [rating, setRating] = useState<RatingRes[]>([]);
+  
 
   const [effects, setEffects] = useState({
     bold: false,
@@ -74,7 +75,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     const fetchRating = async (id:number) => {
       console.log(prop.problem.id);
       const ratingService = new RatingService();
-      const response = await ratingService.getByProblemID(id);
+      const response = await ratingService.getByProblemID(id, token);
       const data = response.data.data;
       setRating(data);
     };
@@ -124,19 +125,19 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     }
   };
   console.log(rating);
-  const totalStars = rating.reduce((acc, curr) => acc + curr.numberOfStar, 0);
-  const totalReviews = rating.length;
-  const overall = totalReviews === 0 ? 0 : totalStars / totalReviews;
+  const totalStars = rating?.reduce((acc, curr) => acc + curr.numberOfStar, 0) || 0;
+  const totalReviews = rating?.length || 0;
+  const overall = totalReviews === 0 ? 0 : totalStars / totalReviews || 0;
 
   const ratings = {
     overall: overall.toFixed(1),
     totalReviews: totalReviews,
     breakdown: {
-      5: rating.filter((r) => r.numberOfStar === 5).length,
-      4: rating.filter((r) => r.numberOfStar === 4).length,
-      3: rating.filter((r) => r.numberOfStar === 3).length,
-      2: rating.filter((r) => r.numberOfStar === 2).length,
-      1: rating.filter((r) => r.numberOfStar === 1).length,
+      5: rating?.filter((r) => r.numberOfStar === 5).length,
+      4: rating?.filter((r) => r.numberOfStar === 4).length,
+      3: rating?.filter((r) => r.numberOfStar === 3).length,
+      2: rating?.filter((r) => r.numberOfStar === 2).length,
+      1: rating?.filter((r) => r.numberOfStar === 1).length,
     },
   };
 
