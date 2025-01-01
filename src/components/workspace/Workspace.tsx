@@ -12,6 +12,7 @@ import SubmissionService from "../../services/SubmissionService";
 import { SubmissionRes } from "../../models/submission";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
+import UserService from "../../services/UserService";
 
 // type WorkspaceProps = {
 //   problemId: number;
@@ -58,11 +59,17 @@ const Workspace = () => {
     };
 
     const fetchSubmission = async () => {
-      const submissionService = new SubmissionService();
-
-      const response = await submissionService.getByProblemAndUserID(3, 1);
-      const data = response.data;
-      setSubmissions(data.data);
+      try {
+        const user = await UserService.getCurrentUser();
+        if (user) {
+          const submissionService = new SubmissionService();
+          const response = await submissionService.getByProblemAndUserID(user.id, problemId.problemId);
+          const data = response.data;
+          setSubmissions(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching submissions:", error);
+      }
     };
 
     fetchProblem();
