@@ -219,7 +219,7 @@ const CreateArticleForm: React.FC = () => {
                         />
                     </div>
                     <div className="mt-3 w-1/2">
-                    {question.options.map((option, oIndex) => (
+                    {question.options.map((option:any, oIndex:any) => (
                         <div key={oIndex} className="flex items-center space-y-4 space-x-2">
                         <Radio
                             checked={question.correctOption === oIndex}
