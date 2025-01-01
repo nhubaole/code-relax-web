@@ -132,19 +132,22 @@ const CreateArticleForm: React.FC = () => {
         <div className="grid grid-cols-2 gap-7 text-[#A2A1A8CC]">
           <input  type="text" placeholder="Title" onChange={(e)=>setTitle(e.target.value)} className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833] focus:outline-none" />
           <input  type="text" placeholder="Summary" onChange={(e)=>setSummary(e.target.value)} className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
-          <div className="mb-4">
-            <label className="text-[white]" htmlFor="">Cover</label>
+
+    
+        </div>
+        <div className="my-6">
+            <label className="text-[white] mb-5" htmlFor="">Cover</label>
+            <div className="mt-3">
             <Upload.Dragger
             onChange={(info) => setCoverImageList(info.fileList)}
             className="border-dashed ant-upload-drag "
             >
             <p className="text-[white] text-xs">
-              Bấm hoặc kéo thả hình ảnh vào đây để <br /> tải ảnh lên!
+              Drag or click here to upload cover image!
             </p>
           </Upload.Dragger>
+            </div>
           </div>
-    
-        </div>
 
 
            <div className="mt-8 w-full">
