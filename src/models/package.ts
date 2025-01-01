@@ -7,12 +7,14 @@ export interface Package {
     icon: string;
     color: string;
 }
+
 export interface ProblemInfor {
     id: number,
-    status: boolean,
+    isSolved: boolean,
     title: string,    
     difficulty: number,
     numOfAcceptance: number,
     numOfSubmission: number,
-    rating: number,
+    averageRating: number,
+    tag:string[],
 }

@@ -18,6 +18,7 @@ import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
+import { UserProvider } from "./context/UserContext";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -71,10 +72,13 @@ function App() {
   };
 
   return (
-      <Router>
+    <UserProvider>
+      <Router>        
         <Layout />
         <ToastContainer />
       </Router>
+    </UserProvider>
+      
     
   );
 }

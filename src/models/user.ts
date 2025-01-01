@@ -28,4 +28,35 @@ export interface UserUpdateReq {
     email: string;
     password: string;
     role: number;
+    google: string;
+    github: string;
+    facebook: string;
+    avatar: File;
+}
+export interface UserUpdateRe {
+    id: number;
+    displayName: string;
+    email: string;
+    password: string;
+    role: number;
+    google: string;
+    github: string;
+    facebook: string;
+}
+
+export interface LeaderBoardReq {
+    userName: number;
+    userAvatar: string; 
+    rank: number; 
+    listUser: listUser[];
+}
+
+export interface listUser {
+    rank: number;
+    userName: string;
+    userAvatar: string; 
+    totalSubmission: number,
+    totalSolved: number,
+    acceptance : number,
+    score: number
 }

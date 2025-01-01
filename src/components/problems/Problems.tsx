@@ -78,16 +78,16 @@ const DivPackage: React.FC <{
 };
 
 const Problem: React.FC <{
-    status: boolean; 
+    isSolved: boolean; 
     title: string; 
-    rating: number; 
+    averageRating: number; 
     difficulty: number; 
-    acceptance: number; }> = ({ status, title, rating, difficulty, acceptance }) => {
+    acceptance: number; }> = ({ isSolved, title, averageRating, difficulty, acceptance }) => {
     
     return (
         <div className="flex w-full px-4 py-4 border-b border-blacklight">
             <div className="flex flex-1">
-                {status ? (
+                {isSolved ? (
                     <img
                         className="object-cover w-5 h-5 ml-1"
                         src={icstatus}
@@ -104,8 +104,7 @@ const Problem: React.FC <{
                     src={star}
                     alt="icon"
                 />
-                {/* <span className="text-left mt-auto mb-auto ml-1 text-[#FFFFFF]">{rating.toFixed(1)} </span>    */}
-                <span className="text-left mt-auto mb-auto ml-1 text-[#FFFFFF]">{rating} </span> 
+                <span className="text-left mt-auto mb-auto ml-1 text-[#FFFFFF]">{averageRating.toFixed(1)} </span> 
             </div>
             <div className="flex-1">
                 <span 
@@ -149,49 +148,40 @@ const Problems = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [filters, setFilters] = useState({
         textSearch: '',
-        tag: '',
-        status: null as boolean | null,
+        tag: [] as string[],
+        isSolved: null as boolean | null,
         difficulty: null as number | null,
       });
 
     useEffect(() => {
-        const fetchPackages = async () => {
-          try {
-            const data = await PackageService.getPackages();
-            setPackages(data); 
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (error) {
-            console.log(error);
-          } 
-        };
+        // const fetchPackages = async () => {
+        //   try {
+        //     const data = await PackageService.getPackages();
+        //     setPackages(data); 
+        //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        //   } catch (error) {
+        //     console.log(error);
+        //   } 
+        // };
 
         const fetchAllProblems = async () => {
-            // try {
+            try {
                 const data = await PackageService.getAllProblem();
-                await Promise.all(data.map(async (problem) => {
-                  const rating = await PackageService.getRatingOfProblem(problem.id); // Gọi API để lấy rating cho mỗi phần tử
-                  return {
-                    ...problem, // Giữ lại tất cả các thuộc tính của problem
-                    rating, // Thêm thông tin rating vào object
-                  };
-                }));
-              setProblems(data); 
-              setOriginalProblems(data);
+                setOriginalProblems(data); 
+                console.log("data:",data);
+                console.log("origin: ",originalProblems);               
+                setProblems(data);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            // } catch (error) {
-            //   console.log(error);
-            // } 
+            } catch (error) {
+              console.log(error);
+            } 
           };
-
-        //fetchPackages();
-        //fetchAllProblems();
-        setOriginalProblems(probleM);
+        fetchAllProblems();
         handleFilterChange();
-        setProblems(probleM);
-    }, [originalProblems]);
+    }, []);
 
     useEffect(() => {
-        handleFilterChange(); // Mỗi khi filters thay đổi, lọc lại dữ liệu
+        handleFilterChange();
     }, [filters]);
     
     const handleSort = (field: keyof ProblemInfor) => {
@@ -217,8 +207,8 @@ const Problems = () => {
     };  
     
     const handleFilterChange = () => {
-        const { textSearch, tag, status, difficulty } = filters;      
-        if (!textSearch && !tag && status === null && difficulty === null) {
+        const { textSearch, tag, isSolved, difficulty } = filters;      
+        if (!textSearch && !tag && isSolved === null && difficulty === null) {
             setProblems(originalProblems);
             return;
         }
@@ -228,13 +218,20 @@ const Problems = () => {
                 problem.title.toLowerCase().includes(textSearch.toLowerCase())
             );
         }
-        if (tag) {
+        // if (tag) {
+        //     filteredProblems = filteredProblems.filter(problem =>
+        //         problem.title.toLowerCase().includes(tag.toLowerCase())
+        //     );
+        // }
+        if (tag && tag.length > 0) {
             filteredProblems = filteredProblems.filter(problem =>
-                problem.title.toLowerCase().includes(tag.toLowerCase())
+                tag.every(filterTag => 
+                    problem.tag.some(t => t.toLowerCase() === filterTag.toLowerCase())
+                )
             );
         }
-        if (status !== null) {
-            filteredProblems = filteredProblems.filter(problem => problem.status === status);
+        if (isSolved !== null) {
+            filteredProblems = filteredProblems.filter(problem => problem.isSolved === isSolved);
         }
         if (difficulty !== null) {
             filteredProblems = filteredProblems.filter(problem => problem.difficulty === difficulty);
@@ -242,17 +239,26 @@ const Problems = () => {
         setProblems(filteredProblems);
     };    
 
+    // const handleTagSelect = (content: string) => {
+    //     setFilters(prevFilters => ({
+    //       ...prevFilters,
+    //       tag: prevFilters.tag === content ? '' : content,  // Nếu tag đã chọn trước đó thì bỏ chọn
+    //     }));
+    //   };
+      
     const handleTagSelect = (content: string) => {
         setFilters(prevFilters => ({
-          ...prevFilters,
-          tag: prevFilters.tag === content ? '' : content,  // Nếu tag đã chọn trước đó thì bỏ chọn
+            ...prevFilters,
+            tag: prevFilters.tag.includes(content) // Kiểm tra xem tag đã tồn tại trong mảng chưa
+                ? prevFilters.tag.filter(tag => tag !== content) // Nếu có thì loại bỏ
+                : [...prevFilters.tag, content] // Nếu chưa có thì thêm vào
         }));
-      };
-      
+    };
+
     const handleSolvedChange = (value: boolean | null) => {
     setFilters(prevFilters => ({
         ...prevFilters,
-        status: prevFilters.status === value ? null : value,
+        isSolved: prevFilters.isSolved === value ? null : value,
     }));
     };
       
@@ -291,7 +297,7 @@ const Problems = () => {
                             <div className="bg-[#ffffff] flex bg-opacity-10 px-4 py-1 rounded shadow-2xl">
                                 <div className="flex flex-1">
                                     <span className="text-xs text-left text-[#FFFFFF] mt-auto mb-auto">STATUS</span>   
-                                    <button onClick={() => handleSort('status')}>
+                                    <button onClick={() => handleSort('isSolved')}>
                                         <img
                                             className="flex-none object-cover w-2 h-2 mt-auto mb-auto ml-1"
                                             src={arrange}
@@ -302,7 +308,7 @@ const Problems = () => {
                                 <div className="flex-none w-1/3 "><span className="text-xs text-left text-[#FFFFFF]">TITLE</span></div>
                                 <div className="flex flex-1">
                                     <span className="text-xs text-left mt-auto mb-auto text-[#FFFFFF]">RATING</span>   
-                                    <button onClick={() => handleSort('rating')}>
+                                    <button onClick={() => handleSort('averageRating')}>
                                         <img
                                             className="flex-none object-cover w-2 h-2 mt-auto mb-auto ml-1"
                                             src={arrange}
@@ -327,9 +333,9 @@ const Problems = () => {
                                 {problems.map((problem, index) => (
                                     <Problem 
                                         key={index} 
-                                        status={problem.status}  
+                                        isSolved={problem.isSolved}  
                                         title={problem.title} 
-                                        rating={problem.rating}  
+                                        averageRating={problem.averageRating}  
                                         difficulty={problem.difficulty} 
                                         acceptance={problem.numOfSubmission === 0 ? 0 : parseFloat((problem.numOfAcceptance / problem.numOfSubmission * 100).toFixed(1))}                                         
                                     />
@@ -364,7 +370,7 @@ const Problems = () => {
                                             <SearchTag 
                                                 content={tag} 
                                                 onSelect={handleTagSelect}
-                                                isSelected={filters.tag === tag}
+                                                isSelected={filters.tag.includes(tag)}
                                             />
                                         </div>
                                     ))}
@@ -377,7 +383,7 @@ const Problems = () => {
                                     <label className="flex items-center mb-2">
                                         <input 
                                             type="checkbox" 
-                                            checked={filters.status === true} 
+                                            checked={filters.isSolved === true} 
                                             onChange={() => handleSolvedChange(true)} 
                                             className="mr-2 custom-checkbox" 
                                         />Solved
@@ -385,7 +391,7 @@ const Problems = () => {
                                     <label className="flex items-center text-[#FFFFFF]">
                                         <input 
                                             type="checkbox" 
-                                            checked={filters.status === false} 
+                                            checked={filters.isSolved === false} 
                                             onChange={() => handleSolvedChange(false)} 
                                             className="mr-2 custom-checkbox"  
                                         />Unsolved
@@ -435,23 +441,5 @@ const Problems = () => {
 
 const colors = ["#8B79F1", "#DF4A52", "#F4AB04", "#1CE496"];
 const icons = [package1, package2, package3, package4];
-
-const tags = ["Array", "String", "Sorting", "Dynamic Programming", "Math", "Hash Table"];
-
-
-const probleM = [
-    { status: true, title: "Solve Me First", rating: 4.0, difficulty: 0, numOfAcceptance: 53, numOfSubmission: 100 },
-    { status: true, title: "Simple Array Sum", rating: 3.5, difficulty: 1, numOfAcceptance: 41 , numOfSubmission: 100},
-    { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: 2, numOfAcceptance: 34, numOfSubmission: 100},
-    { status: false, title: "Reverse Integer", rating: 4.5, difficulty: 2, numOfAcceptance: 29, numOfSubmission: 100},
-    { status: false, title: "Integer to Roman", rating: 5.0, difficulty: 0, numOfAcceptance: 56 , numOfSubmission: 100},
-    { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: 0, numOfAcceptance: 66 , numOfSubmission: 100},
-    { status: true, title: "Solve Me First", rating: 4.0, difficulty: 0, numOfAcceptance: 53 , numOfSubmission: 100},
-    { status: false, title: "Simple Array Sum", rating: 3.5, difficulty: 1, numOfAcceptance: 41 , numOfSubmission: 100},
-    { status: true, title: "A Very Big Sum", rating: 2.8, difficulty: 1,numOfAcceptance: 34, numOfSubmission: 100},
-    { status: false, title: "Reverse Integer", rating: 4.5, difficulty: 2, numOfAcceptance: 29 , numOfSubmission: 100},
-    { status: false, title: "Integer to Roman", rating: 5.0, difficulty: 0, numOfAcceptance: 56, numOfSubmission: 100},
-    { status: true, title: "Add Two Numbers", rating: 2.0, difficulty: 0,numOfAcceptance: 66 , numOfSubmission: 100},
-];
-
+const tags = ["Array", "String", "Sorting", "Dynamic Programming", "Math", "Hash Table", "Hash Map"];
 export default Problems;
