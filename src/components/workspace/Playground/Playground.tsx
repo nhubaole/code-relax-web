@@ -18,7 +18,6 @@ import { Spin } from "antd";
 import SubmissionService from "../../../services/SubmissionService";
 import UserService from "../../../services/UserService";
 
-
 type PlaygroundProps = {
   problem: ProblemRes;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,7 +51,7 @@ const Playground = (prop: PlaygroundProps) => {
   const activeTestCase = testCasesRes.find(
     (testCase) => testCase.id === activeTestCaseId
   );
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (prop.problem) {
@@ -99,12 +98,12 @@ const Playground = (prop: PlaygroundProps) => {
     try {
       const response = await problemService.submit(req, token);
       const data = response.data;
-      var submissionStatus = 0
+      let submissionStatus = 0;
 
       console.log(data.statusCode);
 
-      if (data.statusCode === 0) {
-        submissionStatus = 1
+      if (data.data.success) {
+        submissionStatus = 1;
         toast.success("Congratulation, all testcases passed!");
       } else {
         toast.error(data.message);
@@ -112,8 +111,16 @@ const Playground = (prop: PlaygroundProps) => {
 
       try {
         const user = await UserService.getCurrentUser();
+
         if (user) {
-          await submission.createSubmission(prop.problem.id, user.id, userCode, selectedLanguage, submissionStatus, data.data.output)
+          await submission.createSubmission(
+            prop.problem.id,
+            user.id,
+            userCode,
+            selectedLanguage,
+            submissionStatus,
+            data.data.output
+          );
         }
       } catch (error) {
         console.error("Error fetching getCurrentUser:", error);
@@ -215,8 +222,8 @@ const Playground = (prop: PlaygroundProps) => {
                     className={`font-medium items-center transition-all focus:outline-none inline-flex bg-dark-fill-3 hover:bg-dark-fill-2 relative rounded-lg px-4 py-1 cursor-pointer whitespace-nowrap
                       ${
                         activeTestCaseId === value.id
-                        ? "text-black bg-[#FFF]"
-                        : "text-gray bg-blacklight"
+                          ? "text-black bg-[#FFF]"
+                          : "text-gray bg-blacklight"
                       }
                     `}
                   >
