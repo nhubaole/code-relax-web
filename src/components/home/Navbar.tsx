@@ -1,11 +1,15 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import avatar from "../../assets/avatar.jpg";
+import {  useEffect, useState } from "react";
+import UserService from "../../services/UserService";
+import { UserInfo } from "../../models/user";
 
 interface NavbarProps {
   isLoggedIn: boolean;
 }
 function Navbar(props: NavbarProps) {
-  const username = "Ha Anh";
+  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
+  
   const location = useLocation();
   // const [, setActiveButton] = useState("");
 
@@ -25,6 +29,21 @@ function Navbar(props: NavbarProps) {
     navigate("/profile");
   };
 
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await UserService.getCurrentUser();
+        setCurrentUser(user); 
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+
+    if (props.isLoggedIn) {
+      fetchCurrentUser();
+    }
+  }, [props.isLoggedIn]);
+  
   return (
     <nav className="absolute top-0 left-0 flex justify-between items-center w-full mt-4 pb-2 h-[95px]  bg-transparent text-[#FFFFFF] px-16">
       <div className="flex items-center space-x-4">
@@ -54,9 +73,11 @@ function Navbar(props: NavbarProps) {
           Problems
         </Link>
         <Link
-          to="/"
+          to="/explore"
+          
           className={`hover:text-green-600 ${
-            location.pathname === "/explore" ? "border-b-2 border-gray-200" : ""
+            ["/explore", "/detailexplore"].includes(location.pathname)
+            ? "border-b-2 border-gray-200" : ""
           }`}
         >
           Explore
@@ -72,7 +93,7 @@ function Navbar(props: NavbarProps) {
           Community
         </Link>
         <Link
-          to="/"
+          to="/leaderboard"
           className={`hover:text-green-600 ${
             location.pathname === "/leaderboard"
               ? "border-b-2 border-gray-200"
@@ -89,8 +110,8 @@ function Navbar(props: NavbarProps) {
             <div
               className="flex items-center space-x-4"
               onClick={handleProfileClick}
-            >
-              <span className="font-medium text-[#FFFFFF]">{username}</span>
+            >              
+              <span className="font-medium text-[#FFFFFF]">{currentUser?.displayName || "Loading..."}</span>
               <img
                 src={avatar}
                 alt="User Avatar"

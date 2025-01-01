@@ -7,6 +7,13 @@ export default {
   theme: {
     colors: {
       black: '#151617',
+      dark:{
+        500: '#16151C'
+      },
+      primary:{
+        5: '#7152F30D',
+        500:'#7152F3'
+      },
       blacklight:'#2A2B2D',
       textcolor:'#0B2D41',
       textcolorlight:'#152C5B',
@@ -33,8 +40,11 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Manrope', 'sans-serif'], 
+        popi: 'Poppins',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // require('tailwind-scrollbar-hide')
+  ],
 }

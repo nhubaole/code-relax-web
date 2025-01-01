@@ -14,7 +14,9 @@ import { testCaseFormatter } from "../../../utils/formatter";
 import { generateInitialCode } from "../../../utils/helper";
 import ProblemService from "../../../services/ProblemService";
 import { toast } from "react-toastify";
-import { useLoader } from "../../../context/LoaderContext";
+import { Spin } from "antd";
+import SubmissionService from "../../../services/SubmissionService";
+import UserService from "../../../services/UserService";
 
 type PlaygroundProps = {
   problem: ProblemRes;
@@ -34,8 +36,8 @@ const Playground = (prop: PlaygroundProps) => {
   const [activeTestCaseId, setActiveTestCaseId] = useState<number>(
     prop.testCases[0].id
   );
-  const loader = useLoader();
-  console.log(loader);
+
+  const [isLoading, setIsLoading] = useState(false);
   const [fontSize] = useLocalStorage("lcc-fontSize", "14px");
 
   const [settings, setSettings] = useState<ISettings>({
@@ -49,6 +51,7 @@ const Playground = (prop: PlaygroundProps) => {
   const activeTestCase = testCasesRes.find(
     (testCase) => testCase.id === activeTestCaseId
   );
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (prop.problem) {
@@ -83,47 +86,84 @@ const Playground = (prop: PlaygroundProps) => {
       languageMode = cpp();
   }
   const handleSubmit = async () => {
-    loader.start();
     const problemService = new ProblemService();
+    const submission = new SubmissionService();
+
     const req: SubmitReq = {
       problemID: prop.problem.id,
       sourceCode: userCode,
       language: selectedLanguage,
     };
-    const response = await problemService.submit(req);
-    const data = response.data.data;
+    setIsLoading(true);
+    try {
+      const response = await problemService.submit(req, token);
+      const data = response.data;
+      let submissionStatus = 0;
 
-    if (data.statusCode === 0) {
-      loader.stop();
-      toast.success("Congratulation, all testcases passed!");
-    }
-    if (data.statusCode !== 0) {
-      loader.stop();
-      toast.error(data.message);
+      console.log(data.statusCode);
+
+      if (data.data.success) {
+        submissionStatus = 1;
+        toast.success("Congratulation, all testcases passed!");
+      } else {
+        toast.error(data.message);
+      }
+
+      try {
+        const user = await UserService.getCurrentUser();
+
+        if (user) {
+          await submission.createSubmission(
+            prop.problem.id,
+            user.id,
+            userCode,
+            selectedLanguage,
+            submissionStatus,
+            data.data.output
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching getCurrentUser:", error);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Fail to run code.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleRunCode = async () => {
-    loader.start();
     const problemService = new ProblemService();
     const req: SubmitReq = {
       problemID: prop.problem.id,
       sourceCode: userCode,
       language: selectedLanguage,
     };
-    const response = await problemService.runCode(req);
-    const data = response.data;
-    console.log(data)
+    setIsLoading(true);
+    try {
+      const response = await problemService.runCode(req, token);
+      const data = response.data;
+      console.log(data.statusCode);
 
-    if (data.statusCode === 0) {
-      loader.stop();
-      toast.success("Congratulation, all testcases passed!");
-    }
-    if (data.statusCode !== 0) {
-      loader.stop();
-      toast.error(data.message);
+      if (data.statusCode === 0) {
+        toast.success("Congratulation, all testcases passed!");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Fail to run code.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large"></Spin>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col rounded-lg relative">
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">

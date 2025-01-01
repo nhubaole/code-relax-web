@@ -3,7 +3,11 @@ import home from "../../assets/home.png";
 import img1 from "../../assets/imghome_1.svg";
 import img2 from "../../assets/imghome_2.svg";
 
-const Home = () => {
+interface HomeProps {
+  isLoggedIn: boolean;
+}
+
+const Home: React.FC<HomeProps> = (props) => {
   return (
     <div className="relative">
       <img
@@ -114,25 +118,27 @@ const Home = () => {
         </div>        
       </div>
 
-      <div className="absolute inset-0 flex-col px-28 py-16 top-[2800px] h-72 bg-gradient-to-l from-green-500 to-textcolorlight">
-        <div className="flex justify-center gap-32">
-          <div className="flex-col justify-center flex-1 space-y-5 overflow-hidden ">
-            <strong className="text-left text-[#ffffff] text-6xl w-300">Ready to join?</strong>
-            <p className="text-left text-xl text-[#ffffff] w-[630px]">  Sign up now to begin your coding journey with CodeRelax and conquer coding challenges from easy to advanced.</p>
-          </div>
-          
-          <div className="w-[400px] h-[300px] flex-2 flex-col items-center overflow-hidden">
-          <Link to="/signup">
-            <button 
-              className="px-24 py-5 mt-8 text-2xl text-black bg-yellow-300 rounded-3xl">
-                Sign up now            
-            </button>
-          </Link>
-          </div>
-        </div>        
-      </div>
+      {props.isLoggedIn ? null :(
+        <div className="absolute inset-0 flex-col px-28 py-16 top-[2800px] h-72 bg-gradient-to-l from-green-500 to-textcolorlight">
+          <div className="flex justify-center gap-32">
+            <div className="flex-col justify-center flex-1 space-y-5 overflow-hidden ">
+              <strong className="text-left text-[#ffffff] text-6xl w-300">Ready to join?</strong>
+              <p className="text-left text-xl text-[#ffffff] w-[630px]">  Sign up now to begin your coding journey with CodeRelax and conquer coding challenges from easy to advanced.</p>
+            </div>
+            
+            <div className="w-[400px] h-[300px] flex-2 flex-col items-center overflow-hidden">
+            <Link to="/signup">
+              <button 
+                className="px-24 py-5 mt-8 text-2xl text-black bg-yellow-300 rounded-3xl">
+                  Sign up now            
+              </button>
+            </Link>
+            </div>
+          </div>        
+        </div> )
+      }     
 
-      <div className="absolute inset-0 p-16 top-[3000px] h-auto">
+      <div className={`absolute inset-0 p-16 h-auto ${props.isLoggedIn ? 'top-[2500px]' : 'top-[3000px]'}`}>
         <footer className="py-10 text-gray-200 bg-gray-800 mt-36">
           <div className="container px-4 mx-auto border-t border-textcolor border-opacity-40 ">
               <div className="flex flex-wrap justify-between mt-16">
