@@ -30,4 +30,20 @@ export default  class SubmissionService {
           throw error;
         }
     }
+    async createSubmission(problemId: number, userId: number, code: string, language: string, status: number, result: string) {
+      const url = SUBMISSION_ENDPOINT + `/Create`;
+      try {
+        const res = await apiClient.post(url, {
+          problemID: problemId,
+          userID: userId,
+          code: code,
+          language: language,
+          status: status,
+          result: result
+        })
+        return res;
+      } catch (error) {
+        throw error;
+      }
+  }
 }

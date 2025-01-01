@@ -65,6 +65,7 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
     setCurrentUser(updatedUser);      
   };
 
+
   const handleLogout = () => {
     navigate("/");
     onLogoutSuccess();

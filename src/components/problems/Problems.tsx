@@ -12,6 +12,10 @@ import star from "../../assets/Star.svg"
 import search from "../../assets/search.svg"
 import PackageService from "../../services/PackageService";
 import { Package, ProblemInfor, Tag } from "../../models/package";
+import { ProblemRes } from "../../models/problem";
+import { useNavigate } from "react-router-dom";
+import ProblemService from "../../services/ProblemService";
+import { Package, ProblemInfor } from "../../models/package";
 
 const PackageTag = ({ content }: { content: string }) => {
     return (
@@ -76,13 +80,19 @@ const DivPackage: React.FC <{
 
 const Problem: React.FC <{
     isSolved: boolean; 
+    id: number
     title: string; 
     averageRating: number; 
     difficulty: number; 
-    acceptance: number; }> = ({ isSolved, title, averageRating, difficulty, acceptance }) => {
+    acceptance: number; }> = ({ id, isSolved, title, averageRating, difficulty, acceptance }) => {
+    
+    const navigate = useNavigate()
+    const handleProblemClick = () => {
+        navigate("/workspace", {state: {problemId: id}})
+    }
     
     return (
-        <div className="flex w-full px-4 py-4 border-b border-blacklight">
+        <div onClick={handleProblemClick} className="flex w-full px-4 py-4 border-b border-blacklight cursor-pointer">
             <div className="flex flex-1">
                 {isSolved ? (
                     <img
@@ -347,6 +357,7 @@ const Problems = () => {
                                     <Problem 
                                         key={index} 
                                         isSolved={problem.isSolved}  
+                                        id={problem.id}
                                         title={problem.title} 
                                         averageRating={problem.averageRating}  
                                         difficulty={problem.difficulty} 

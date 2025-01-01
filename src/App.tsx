@@ -8,17 +8,18 @@ import {
   useLocation,
 } from "react-router-dom";
 import SignUp from "./components/auth/SignUp";
-import Profile from "./components/profile/Profile";
 import Navbar from "./components/home/Navbar";
 import Problems from "./components/problems/Problems";
 import { useEffect, useState } from "react";
 import Home from "./components/home/Home";
 import Workspace from "./components/workspace/Workspace";
+import Admin from "./pages/admin";
 import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
 import { UserProvider } from "./context/UserContext";
+import Profile from "./components/profile/Profile";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,18 +41,21 @@ function App() {
     localStorage.removeItem("isLoggedIn");
   };
 
+
   const Layout = () => {
     const location = useLocation();
 
     return (
-      <> 
+      <>
         <Routes>
-          <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/problems" element={<Problems />} />
-          <Route path="/workspace" element={<Workspace problemId={1} />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/detailexplore" element={<DetailExplore isLoggedIn={isLoggedIn}/>} />
-          <Route path="/leaderboard" element={<LeaderBoard isLoggedIn={isLoggedIn}/>}/>
+          <Route path="/workspace" element={<Workspace/>} />
+          <Route
+            path="/explore"
+            element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
+          />
           <Route
             path="/login"
             element={<LogIn onLoginSuccess={handleLoginSuccess} />}
@@ -61,10 +65,13 @@ function App() {
             path="/profile"
             element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
           />
+           <Route path="/" element={<Home isLoggedIn/>} />
+        {/* <Route path="/community" element={<Community />} /> */}
+        {/* <Route path="/leaderboard" element={<Leaderboard />} /> */}
         </Routes>
-        {location.pathname !== "/workspace" && (
-          <div className="absolute top-0 left-0 w-full">           
-              <Navbar isLoggedIn={isLoggedIn} />            
+        {(location.pathname !== "/workspace" && location.pathname !== "/admin") && (
+          <div className="absolute top-0 left-0 w-full">
+            <Navbar isLoggedIn={isLoggedIn} />
           </div>
         )}
       </>
@@ -79,7 +86,6 @@ function App() {
       </Router>
     </UserProvider>
       
-    
   );
 }
 
