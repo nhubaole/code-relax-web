@@ -1,4 +1,5 @@
 import { CreateDiscussionReq } from "../models/discussion";
+import { CreateRatingReq } from "../models/rating";
 import { apiClient } from "../utils/apiClient";
 import { RATING_ENDPOINT } from "../utils/constants";
 
@@ -32,10 +33,14 @@ export default  class RatingService {
         }
     }
 
-    async create(req: CreateDiscussionReq) {
+    async create(req: CreateRatingReq, token: string|null) {
         const url = RATING_ENDPOINT;
         try {
-          const res = await apiClient.post(url, req)
+          const res = await apiClient.post(url, req,{
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
           return res;
         } catch (error) {
           throw error;
