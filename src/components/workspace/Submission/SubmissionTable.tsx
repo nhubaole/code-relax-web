@@ -48,10 +48,10 @@ const SubmissionsTable = (props: SubmissionsTableProps) => {
             {/* Status */}
             <div
               className={`flex-1 font-[550] ${
-                sub.status === 0 ? "text-green-500" : "text-red"
+                sub.status === 1 ? "text-green-500" : "text-red"
               }`}
             >
-              {sub.status === 0 ? "ACCEPTED" : "WRONG ANSWER"}
+              {sub.status === 1 ? "ACCEPTED" : "WRONG ANSWER"}
             </div>
             {/* Language */}
             <div className="flex-1">{sub.language}</div>

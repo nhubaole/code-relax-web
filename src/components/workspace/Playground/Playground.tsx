@@ -15,6 +15,8 @@ import { generateInitialCode } from "../../../utils/helper";
 import ProblemService from "../../../services/ProblemService";
 import { toast } from "react-toastify";
 import { Spin } from "antd";
+import SubmissionService from "../../../services/SubmissionService";
+import UserService from "../../../services/UserService";
 
 type PlaygroundProps = {
   problem: ProblemRes;
@@ -49,6 +51,7 @@ const Playground = (prop: PlaygroundProps) => {
   const activeTestCase = testCasesRes.find(
     (testCase) => testCase.id === activeTestCaseId
   );
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (prop.problem) {
@@ -84,6 +87,8 @@ const Playground = (prop: PlaygroundProps) => {
   }
   const handleSubmit = async () => {
     const problemService = new ProblemService();
+    const submission = new SubmissionService();
+
     const req: SubmitReq = {
       problemID: prop.problem.id,
       sourceCode: userCode,
@@ -91,14 +96,34 @@ const Playground = (prop: PlaygroundProps) => {
     };
     setIsLoading(true);
     try {
-      const response = await problemService.submit(req);
+      const response = await problemService.submit(req, token);
       const data = response.data;
+      let submissionStatus = 0;
+
       console.log(data.statusCode);
 
-      if (data.statusCode === 0) {
+      if (data.data.success) {
+        submissionStatus = 1;
         toast.success("Congratulation, all testcases passed!");
       } else {
         toast.error(data.message);
+      }
+
+      try {
+        const user = await UserService.getCurrentUser();
+
+        if (user) {
+          await submission.createSubmission(
+            prop.problem.id,
+            user.id,
+            userCode,
+            selectedLanguage,
+            submissionStatus,
+            data.data.output
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching getCurrentUser:", error);
       }
     } catch (error: any) {
       toast.error(error.message || "Fail to run code.");
@@ -116,7 +141,7 @@ const Playground = (prop: PlaygroundProps) => {
     };
     setIsLoading(true);
     try {
-      const response = await problemService.runCode(req);
+      const response = await problemService.runCode(req, token);
       const data = response.data;
       console.log(data.statusCode);
 

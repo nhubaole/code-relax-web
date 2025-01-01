@@ -46,20 +46,28 @@ export default  class ProblemService {
           }
     }
 
-    async submit(req: SubmitReq){
+    async submit(req: SubmitReq, token: string|null){
       const url = PROBLEM_ENDPOINT + '/Submit'
       try {
-        const res = await apiClient.post(url, req)
+        const res = await apiClient.post(url, req, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         return res;
       } catch (error) {
         throw error;
       }
     }
 
-    async runCode(req: SubmitReq){
+    async runCode(req: SubmitReq, token: string|null){
       const url = PROBLEM_ENDPOINT + '/RunCode'
       try {
-        const res = await apiClient.post(url, req)
+        const res = await apiClient.post(url, req, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         return res;
       } catch (error) {
         throw error;
