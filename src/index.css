@@ -2,6 +2,120 @@
 @tailwind components;
 @tailwind utilities;
 
+
+ant-radio-checked .ant-radio-inner{
+  border-color: red !important ;
+}
+
+button:disabled {
+  background-color: #7152F3 !important; /* Màu nền khi bị vô hiệu hóa */
+  color: #fff !important; /* Màu nền khi bị vô hiệu hóa */
+  cursor: not-allowed; /* Thay đổi con trỏ chuột */
+}
+
+
+.ant-radio  {
+  border-color: #A2A1A8 !important;
+  background-color: #2A2B2D !important;
+}
+
+.ant-radio-checked .ant-radio-inner:after{
+  background-color: #2A2B2D;
+}
+
+.ant-radio:hover .ant-radio-inner {
+  border-color: #2A2B2D ;
+}
+
+.custom-modal .ant-modal-header {
+  background: #16151C !important; /* Dark header background */
+  border-bottom: none;
+}
+
+.custom-modal .ant-modal-title {
+  color: white !important; /* White text for the title */
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.custom-modal .ant-modal-body {
+  background: #16151C !important; /* Dark modal body background */
+}
+
+.custom-modal .ant-modal-footer {
+  background: #16151C !important; /* Dark modal footer background */
+  border-top: none;
+}
+
+.custom-modal .ant-input {
+  background: #16151C !important; /* Dark input fields */
+  color: white !important;
+  border: 1px solid #A2A1A833 !important; /* Light border */
+  border-radius: 8px;
+}
+
+.custom-modal .ant-input::placeholder {
+  color: #A2A1A8 !important; /* Custom placeholder text color */
+  opacity: 1; /* Ensure the color is fully visible */
+}
+
+.custom-modal .ant-btn {
+  height: 40px;
+  border-radius: 8px;
+}
+
+.custom-modal .ant-btn-primary {
+  background-color: #7152F3 !important; /* Purple button for primary actions */
+  border-color: #7152F3 !important;
+}
+
+.custom-modal .ant-btn-default {
+  background-color: #16151C !important; /* Dark button for default actions */
+  color: white !important;
+  border-color: #A2A1A833 !important;
+}
+
+
+.custom-select {
+    @apply  rounded-lg bg-[#16151C] text-[white];
+    .ant-select-selection-item {
+        @apply text-[#A2A1A8CC] border-none rounded-lg px-3 py-1 flex items-center cursor-pointer;
+      }
+    /* Ensure the inner input background matches */
+    .ant-select-selector {
+      @apply bg-[#16151C] outline-none border-none !important;
+    }
+     /* Remove focus outline and apply custom border */
+
+    .ant-select-selection-placeholder {
+      @apply text-[#A2A1A8CC] !important;
+    }
+    
+ 
+  }
+/* Custom styling for the remove (x) icon */
+.custom-select .ant-select-selection-item-remove {
+    color: #A2A1A833!important; /* Tailwind red-500 */
+    transition: color 0.3s;
+  }
+  
+  .custom-select .ant-select-selection-item-remove:hover {
+    color: #A2A1A833 !important; /* Tailwind red-400 */
+  }
+  
+  /* Dropdown Icon Styling */
+.custom-select .ant-select-arrow {
+    @apply text-[#A2A1A833]; /* Change the dropdown arrow color */
+  }
+  /* Custom dropdown styling */
+  .custom-dropdown {
+    @apply rounded-lg bg-[#16151C] border border-[#A2A1A833] shadow-lg  !important;
+  
+   
+   
+  }
+  
+  
 .gutter-vertical:hover {
     background-color: #2A2B2D;
     cursor: row-resize /* Blue color when hovered */
@@ -52,3 +166,23 @@
     border-width: 0px 2px 2px 0px; 
     transform: rotate(45deg); 
 }
+
+.custom-modal .ant-modal-content {
+    background-color: #159571; /* Xanh */
+    color: white; /* Màu chữ trắng */
+  }
+  
+  .custom-modal .ant-modal-header {
+    background-color: #159571; 
+    color: white; 
+  }
+  
+  .custom-modal .ant-modal-footer {
+    background-color: #159571; 
+    color: white;
+  }
+  
+  .custom-modal .ant-modal-title {
+    color: white;
+  }
+  

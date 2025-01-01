@@ -10,32 +10,27 @@ import SubmissionsTable from "./Submission/SubmissionTable";
 import SubmissionDetail from "./Submission/SubmissionDetail";
 import SubmissionService from "../../services/SubmissionService";
 import { SubmissionRes } from "../../models/submission";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Spin } from "antd";
 
-type WorkspaceProps = {
-  problemId: number;
-};
+// type WorkspaceProps = {
+//   problemId: number;
+// };
 
-const Workspace = (prop: WorkspaceProps) => {
+const Workspace = () => {
   const { width, height } = useWindowSize();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
   const [solved, setSolved] = useState(false);
-  const [problem, setProblem] = useState<ProblemRes>({
-    id: 0,
-    title: "",
-    explaination: "",
-    numOfAcceptance: 0,
-    numOfSubmission: 0,
-    difficulty: 1,
-    functionName: "",
-    returnType: "",
-    createdAt: new Date(),
-  });
+  const [problem, setProblem] = useState<ProblemRes>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [submissions, setSubmissions] = useState<SubmissionRes[]>([]);
   const [tab, setTab] = useState("description");
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionRes>();
+  const token = localStorage.getItem('token');
+  const location = useLocation();
+  const problemId = location.state || {};
+
 
   const handleTabChange = (newTab: string) => {
     setTab(newTab);
@@ -45,14 +40,19 @@ const Workspace = (prop: WorkspaceProps) => {
     const fetchProblem = async () => {
       const problemService = new ProblemService();
 
-      const response = await problemService.getByID(1);
-      const data = response.data;
-      setProblem(data.data);
+      if (token){
+        const response = await problemService.getByID(problemId.problemId, token);
+        const data = response.data;
+        setProblem(data.data);
+      }
     };
     const fetchTestCase = async () => {
       const problemService = new ProblemService();
 
-      const response = await problemService.getTestCaseByProblem(1);
+      const response = await problemService.getTestCaseByProblem(
+        problemId.problemId,
+        token
+      );
       const data = response.data;
       setTestCases(data.data);
     };
@@ -68,7 +68,7 @@ const Workspace = (prop: WorkspaceProps) => {
     fetchProblem();
     fetchTestCase();
     fetchSubmission();
-  }, [prop.problemId]);
+  }, [problemId.problemId]);
 
   const handleSubmissionClick = (submission: SubmissionRes) => {
     setSelectedSubmission(submission);
@@ -76,13 +76,23 @@ const Workspace = (prop: WorkspaceProps) => {
   };
 
   const handleClickHome = () => {
-    navigate("/")
-  }
+    navigate("/");
+  };
 
+  if (!problem) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large"></Spin>
+      </div>
+    );
+  }
   return (
     <>
       <div className="pt-4 flex bg-[#151617] items-center space-x-6">
-        <div className="flex items-center space-x-4 py-2 px-6 cursor-pointer" onClick={handleClickHome}>
+        <div
+          className="flex items-center space-x-4 py-2 px-6 cursor-pointer"
+          onClick={handleClickHome}
+        >
           <div className="flex">
             <h2 className="text-2xl font-bold text-[#FFFFFF]">CODE</h2>
             <h2 className="text-2xl font-bold text-green-300">RELAX</h2>
@@ -108,7 +118,7 @@ const Workspace = (prop: WorkspaceProps) => {
             />
           ) : (
             <ProblemDescription
-              _solved={solved}
+              _solved={problem.isSolved}
               problem={problem}
               testCases={testCases}
               onTabChange={handleTabChange}

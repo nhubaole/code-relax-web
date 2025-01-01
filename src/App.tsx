@@ -13,6 +13,7 @@ import Problems from "./components/problems/Problems";
 import { useEffect, useState } from "react";
 import Home from "./components/home/Home";
 import Workspace from "./components/workspace/Workspace";
+import Admin from "./pages/admin";
 import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
@@ -42,24 +43,44 @@ function App() {
 
   const Layout = () => {
     const location = useLocation();
-  }
 
-  return (    
-    <Router>     
-      <Routes>
-        <Route path="/" element={<Home isLoggedIn/>} />
-        <Route path="/problems" element={<Problems />} />
-        <Route path="/explore" element={<Profile onLogoutSuccess={handleLogoutSuccess}/>} />
+    return (
+      <>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/problems" element={<Problems />} />
+          <Route path="/workspace" element={<Workspace/>} />
+          <Route
+            path="/explore"
+            element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
+          />
+          <Route
+            path="/login"
+            element={<LogIn onLoginSuccess={handleLoginSuccess} />}
+          />
+          <Route path="/signup" element={<SignUp />} />
+          <Route
+            path="/profile"
+            element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
+          />
+           <Route path="/" element={<Home isLoggedIn/>} />
         {/* <Route path="/community" element={<Community />} /> */}
         {/* <Route path="/leaderboard" element={<Leaderboard />} /> */}
-        <Route path="/login" element={<LogIn onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/profile" element={<Profile onLogoutSuccess={handleLogoutSuccess} />} />
-      </Routes>    
+        </Routes>
+        {(location.pathname !== "/workspace" && location.pathname !== "/admin") && (
+          <div className="absolute top-0 left-0 w-full">
+            <Navbar isLoggedIn={isLoggedIn} />
+          </div>
+        )}
+      </>
+    );
+  };
 
-      <div className="absolute top-0 left-0 w-full">
-        <Navbar isLoggedIn={isLoggedIn} />
-      </div> 
+  return (    
+    <Router>
+      <Layout />
+      <ToastContainer />
     </Router>
   );
 }

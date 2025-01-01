@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmissionRes, SubmissionStatisticRes } from "../../models/submission";
 import SubmissionService from "../../services/SubmissionService";
 import { formatDateTime } from "../../utils/formatter";

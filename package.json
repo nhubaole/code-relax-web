@@ -16,6 +16,7 @@
     "@codemirror/lang-python": "^6.1.6",
     "@uiw/codemirror-theme-vscode": "^4.23.5",
     "@uiw/react-codemirror": "^4.23.5",
+    "antd": "^5.22.5",
     "axios": "^1.7.7",
     "axios": "^1.7.7",
     "codemirror": "^6.0.1",
