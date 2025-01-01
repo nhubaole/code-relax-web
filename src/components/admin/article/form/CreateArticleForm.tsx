@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Button, Modal, Radio } from "antd";
+import { Input, Button, Modal, Radio, Upload } from "antd";
 
 
 const CreateArticleForm: React.FC = () => {
@@ -85,7 +85,15 @@ const CreateArticleForm: React.FC = () => {
         <div className="grid grid-cols-2 gap-7 text-[#A2A1A8CC]">
           <input  type="text" placeholder="Title" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833] focus:outline-none" />
           <input  type="text" placeholder="Summary" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
-          <input  type="text" placeholder="Cover Url" className="p-2 rounded-lg bg-[#16151C] border border-[#A2A1A833]  focus:outline-none" />
+          <Upload.Dragger
+                     
+                      className="border-dashed ant-upload-drag"
+                    >
+                     
+                      <p className="text-[white] text-xs">
+                        Bấm hoặc kéo thả hình ảnh vào đây để <br /> tải ảnh lên!
+                      </p>
+                    </Upload.Dragger>
     
         </div>
 

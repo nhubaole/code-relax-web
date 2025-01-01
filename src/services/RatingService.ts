@@ -4,7 +4,7 @@ import { RATING_ENDPOINT } from "../utils/constants";
 
 export default  class RatingService {
     constructor(){}
-    async getByProblemID(id: number, token: string) {
+    async getByProblemID(id: number, token: string|null) {
         const url = RATING_ENDPOINT + `/Problem/${id}`;
         try {
           const res = await apiClient.get(url, {

@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import AllProblemPage from "./problem/AllProblemPage";
 import CreateProblemForm from "./problem/form/CreateProblemForm";
 import CreateArticleForm from "./article/form/CreateArticleForm";
+import AllArticlePage from "./article/AllArticlePage";
 
 const Sidebar = () => {
   const menuItems = [
     { name: "New problem", icon: "🏠" },
     { name: "Problem", icon: "👥" },
     { name: "New Article", icon: "🏢" },
+    { name: "Article", icon: "🏢" },
   ];
 
   const [activeMenu, setActiveMenu] = useState("New problem");
@@ -51,6 +53,11 @@ const Sidebar = () => {
         {activeMenu === "New Article" && (
           <div>
             <CreateArticleForm/>
+          </div>
+        )}
+         {activeMenu === "Article" && (
+          <div>
+            <AllArticlePage/>
           </div>
         )}
       </div>

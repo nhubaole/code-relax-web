@@ -14,10 +14,14 @@ export default  class ArticleService {
         }
     }
 
-    async getAll() {
+    async getAll(token: string| null) {
       const url = ARTICLE_ENDPOINT;
       try {
-        const res = await apiClient.get(url)
+        const res = await apiClient.get(url, {
+          headers: {
+              'Authorization': `Bearer ${token}`,
+          },
+        })
         return res;
       } catch (error) {
         throw error;
@@ -34,7 +38,7 @@ export default  class ArticleService {
         throw error;
       }
     }
-    static async getAllArticle() {
+    async getAllArticle() {
       const url = ARTICLE_ENDPOINT;
       try {
         const token = localStorage.getItem('token');

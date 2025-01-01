@@ -28,3 +28,16 @@ export interface ArticleGetAllReq {
     summary: string;
     cover:string;
 }
+
+export interface ArticleRes {
+    id: number;
+    title: string;
+    summary: string;
+    subTitle: string[];
+    cover : string;
+    content: string[];
+    createdAt: string;
+    updatedAt: string;
+    userID: number;
+    quizzes: Quiz[];
+}

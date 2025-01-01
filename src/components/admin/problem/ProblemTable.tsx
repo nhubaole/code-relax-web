@@ -14,12 +14,13 @@ type Problem = {
 
 const ProblemTable = () => {
   const [problems, setProblems] = useState<Problem[]>([])
+  const token = localStorage.getItem('token');
   useEffect(()=>{
     const fetchProblems = async () => {
       try{
         const problemService = new ProblemService();
 
-        const response = await problemService.getAll();
+        const response = await problemService.getAll(token);
         const data = response.data;
         setProblems(data.data);
       }catch (error: any) {

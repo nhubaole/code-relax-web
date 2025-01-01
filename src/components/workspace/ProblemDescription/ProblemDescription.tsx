@@ -1,6 +1,6 @@
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { TiStarOutline } from "react-icons/ti";
-import { BiBold, BiItalic, BiCode, BiLink } from "react-icons/bi";
+import { BiBold, BiItalic, BiCode, BiLink, BiImageAdd } from "react-icons/bi";
 import {
   EasyTag,
   HardTag,
@@ -12,7 +12,7 @@ import tag from "../../../assets/tag.svg";
 import disscussion from "../../../assets/disscussion.svg";
 import down from "../../../assets/direction_down.svg";
 import up from "../../../assets/up.svg";
-import { testCaseFormatter } from "../../../utils/formatter";
+import { formatDateTime, testCaseFormatter } from "../../../utils/formatter";
 import { ProblemRes, TestCase } from "../../../models/problem";
 import { useEffect, useState } from "react";
 import { DiscussionRes } from "../../../models/discussion";
@@ -20,6 +20,7 @@ import DiscussionService from "../../../services/DiscussionService";
 import { toast } from "react-toastify";
 import { RatingRes } from "../../../models/rating";
 import RatingService from "../../../services/RatingService";
+import { USER_DEFAULT_AVATAR } from "../../../utils/constants";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -37,23 +38,28 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
   const [newDiscussion, setNewDiscussion] = useState("");
   const [rating, setRating] = useState<RatingRes[]>([]);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   
 
   const [effects, setEffects] = useState({
     bold: false,
     italic: false,
     code: false,
-    link: false,
+    image: false,
   });
 
-  console.log(prop.problem);
 
   const toggleEffect = (effect: keyof typeof effects) => {
-    setEffects((prev) => ({
-      ...prev,
-      [effect]: !prev[effect], // Đảo trạng thái của hiệu ứng được nhấn
-    }));
+    if (effect === "image") {
+      document.getElementById("image-upload")?.click();
+    } else {
+      setEffects((prev) => ({
+        ...prev,
+        [effect]: !prev[effect], // Đảo trạng thái hiệu ứng khác
+      }));
+    }
   };
+  console.log(selectedImage)
 
   const testCasesRes = testCaseFormatter(prop.testCases);
   const acceptanceRate =
@@ -64,7 +70,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   useEffect(() => {
     const fetchdiscussion = async () => {
       const discussionService = new DiscussionService();
-      const response = await discussionService.getByProblemID(prop.problem.id);
+      const response = await discussionService.getByProblemID(prop.problem.id, token);
       const data = response.data.data;
       setDiscussions(data);
     };
@@ -73,7 +79,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
   useEffect(() => {
     const fetchRating = async (id:number) => {
-      console.log(prop.problem.id);
       const ratingService = new RatingService();
       const response = await ratingService.getByProblemID(id, token);
       const data = response.data.data;
@@ -83,24 +88,41 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   },[]);
 
   const handleCreateDiscussion = async () => {
-    if (!newDiscussion.trim()) {
-      alert("Discussion content cannot be empty!");
-      return;
-    }
+   
 
     try {
       const discussionService = new DiscussionService();
 
-      const createResponse = await discussionService.create({
-        content: newDiscussion,
-        type: "text",
-        userID: 3,
-        problemID: prop.problem.id,
-      });
+      let payload: any;
+
+      if (selectedImage) {
+        payload = {
+          formFile: selectedImage,
+          type: "image",
+          userID: 3,
+          problemID: prop.problem.id,
+        }
+
+      } else {
+        if (!newDiscussion.trim()) {
+          toast.error("Discussion content cannot be empty!");
+          return;
+        }
+        payload = {
+          content: newDiscussion,
+          formFile: null,
+          type: "text",
+          userID: 3,
+          problemID: prop.problem.id,
+        };
+      }
+      const createResponse = await discussionService.create(payload, token);
 
       if (createResponse.status === 201) {
+        toast.success("Create successfully")
+        setSelectedImage(null)
         const id = createResponse.data.data;
-
+        
         const getResponse = await discussionService.getByID(id);
         if (getResponse.status === 200) {
           const newDiscussionData = getResponse.data.data;
@@ -143,7 +165,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
   const maxRatingCount = Math.max(...Object.values(ratings.breakdown));
   return (
-    <div className="bg-[#1E1E1E] rounded-lg">
+    <div className="bg-[#1E1E1E] rounded-lg ">
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
           className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
@@ -165,7 +187,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       </div>
 
       <div className="flex px-0 py-4 h-[calc(100vh-94px)] overflow-y-auto">
-        <div className="px-5">
+        <div className="px-5 min-w-full">
           <div className="break-all">
             <div className="flex space-x-4 items-center justify-between">
               <div className="flex mr-32 text-[#FFF] items-center space-x-3">
@@ -282,14 +304,40 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                         }`}
                         onClick={() => toggleEffect("code")}
                       />
-                      <BiLink
+                      <BiImageAdd
                         className={`cursor-pointer ${
-                          effects.link ? "text-green-500" : "text-[#fff]"
+                          effects.image ? "text-green-500" : "text-[#fff]"
                         }`}
-                        onClick={() => toggleEffect("link")}
+                        onClick={() => toggleEffect("image")}
                       />
+                      <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setSelectedImage(e.target.files ? e.target.files[0] : null)
+                      }
+                    />
+                   
                     </div>
-                    <textarea
+                    {selectedImage && (
+                      <div className="mt-4">
+                        <img
+                          src={URL.createObjectURL(selectedImage)}
+                          alt="Preview"
+                          className="w-full h-auto rounded-lg"
+                        />
+                        <button
+                          className="bg-[#1E1E1E] mb-2 text-white px-4 py-2 rounded-lg mt-2"
+                          onClick={handleCreateDiscussion}
+                        >
+                          Send
+                        </button>
+                      </div>
+                    )}
+                    {!selectedImage && (
+                      <textarea
                       placeholder="Aa"
                       className="w-full bg-[#1E1E1E] text-gray-400 p-2 rounded-md outline-none resize-none"
                       value={newDiscussion}
@@ -317,25 +365,42 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                         }
                       }}
                     ></textarea>
+                    )}
                   </div>
                   {discussions.map((discussion) => (
-                    <div
-                      key={discussion.id}
-                      className="flex items-start space-x-4 my-4"
-                    >
+                  <div
+                    key={discussion.id}
+                    className="flex justify-between items-center space-x-4 my-4"
+                  >
+                    <div className="flex items-start space-x-4 my-4">
                       <img
-                        src={""}
+                        src={discussion.user?.avatarUrl || USER_DEFAULT_AVATAR}
                         alt="User"
-                        className="w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full object-cover"
                       />
                       <div className="text-gray">
                         <p className="font-bold text-[#fff]">
                           {discussion.user?.displayName || "Anonymous"}
                         </p>
-                        <p>{discussion.content}</p>
+                        {discussion.type === "image" ? (
+                          <div className="mt-2">
+                            <img
+                              src={discussion.imageContent || ""}
+                              alt="Discussion"
+                              className="w-52 max-w-sm rounded-lg cursor-pointer"
+                              onClick={() => window.open(discussion.imageContent, "_blank")}
+                            />
+                          </div>
+                        ) : (
+                          <p>{discussion.content}</p>
+                        )}
                       </div>
                     </div>
-                  ))}
+
+                    <div className="text-[white]">{formatDateTime(discussion.createdAt)}</div>
+                  </div>
+                ))}
+
                 </div>
               )}
 

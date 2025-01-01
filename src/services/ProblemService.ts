@@ -4,7 +4,7 @@ import { PROBLEM_ENDPOINT } from "../utils/constants";
 
 export default  class ProblemService {
     constructor(){}
-    async getByID(id: number, token: string) {
+    async getByID(id: number, token: string|null) {
         const url = PROBLEM_ENDPOINT + `/${id}`;
         try {
           const res = await apiClient.get(url, {
@@ -18,7 +18,7 @@ export default  class ProblemService {
         }
     }
 
-    async getAll(token: string) {
+    async getAll(token: string|null) {
       const url = PROBLEM_ENDPOINT;
       try {
         const res = await apiClient.get(url, {

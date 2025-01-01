@@ -1,16 +1,16 @@
 import { Pagination } from "antd";
 import SearchBar from "../Searchbar";
-import ProblemTable from "./ProblemTable";
+import ArticleTable from "./ArticleTable";
 
 
-const AllProblemPage = () => {
+const AllArticlePage = () => {
   return (
     <div className="h-screen text-[white]">
       <SearchBar />
-      <ProblemTable />
+      <ArticleTable />
       <Pagination className="text-gray" />
     </div>
   );
 };
 
-export default AllProblemPage;
+export default AllArticlePage
