@@ -2,34 +2,37 @@ import {  useState } from 'react';
 import facebook from "../../assets/facebook.svg";
 import github from "../../assets/github.svg";
 import google from "../../assets/google.svg";
-import { UserInfo, UserUpdateReq } from '../../models/user';
-import UserService from '../../services/UserService';
-
+import { UserUpdateRe } from '../../models/user';
+import { useUser } from '../../context/UserContext';
 interface DivAccountProps {
-    currentUser: UserInfo | null;
-    onUpdateSuccess: () => void;
+    onUpdateSuccess: (updateData: UserUpdateRe) => void;
 }
   
-const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
+const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
+    const { currentUser } = useUser(); 
     const [isEditing, setIsEditing] = useState(false);
 
     const handleEditClick = async () => {
         if (isEditing) {            
             try {
                 const name = (document.getElementById('_name') as HTMLInputElement).value;
-                //const password = (document.getElementById('_password') as HTMLInputElement).value;
+                const password = (document.getElementById('_password') as HTMLInputElement).value;
                 const email = (document.getElementById('_email') as HTMLInputElement).value;
-                const updateData: UserUpdateReq = {
+                const google = (document.getElementById('_google') as HTMLInputElement).value;
+                const github = (document.getElementById('_github') as HTMLInputElement).value;
+                const facebook = (document.getElementById('_facebook') as HTMLInputElement).value;
+                const updateData: UserUpdateRe = {
                     id: currentUser?.id || 0,
                     displayName: name,
                     email: email,
-                    password: "User#1234",
+                    password: password,
                     role: currentUser?.role || 0,
-                };
-                const updatedUser = await UserService.updateUser(updateData);
-                console.log("User updated:", updatedUser);
+                    google: google,
+                    github: github,
+                    facebook: facebook,
+                };                
                 setIsEditing(!isEditing);
-                onUpdateSuccess();
+                onUpdateSuccess(updateData);
             } catch (error) {
                 console.error("Failed to update user:", error);
             }
@@ -51,7 +54,6 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 bg-opacity-0 text-sm border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         defaultValue={currentUser?.displayName}
-                       // onChange={handleChange}
                         readOnly={!isEditing}
                         required
                     />      
@@ -66,7 +68,6 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         defaultValue={currentUser?.email}
-                        //onChange={handleChange}
                         readOnly={!isEditing}
                         required
                     />               
@@ -78,10 +79,9 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                     <span className="flex-none text-sm w-96 text-left text-[#FFFFFF]">Password</span>
                     <input
                         id='_password'
-                        type="text"
+                        type="password"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue={'*'.repeat(currentUser?.password.length ?? 0)}
-                        //onChange={handleChange}
+                        defaultValue={currentUser?.password}
                         readOnly={!isEditing}
                         required
                     />   
@@ -102,7 +102,7 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF]  bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder="Your Google username or url"
-                        value={currentUser?.google}
+                        defaultValue={currentUser?.google}
                         readOnly={!isEditing}
                         required
                     />      
@@ -118,7 +118,7 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder="Your Github username or url"
-                        value={currentUser?.github}
+                        defaultValue={currentUser?.github}
                         readOnly={!isEditing}
                         required
                     />               
@@ -134,7 +134,7 @@ const DivAccount = ({ currentUser, onUpdateSuccess }: DivAccountProps) => {
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder='Your Facebook username or url'                        
-                        value={currentUser?.facebook}
+                        defaultValue={currentUser?.facebook}
                         readOnly={!isEditing}
                         required
                     />   

@@ -1,17 +1,12 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import avatar from "../../assets/avatar.jpg";
-import {  useEffect, useState } from "react";
-import UserService from "../../services/UserService";
-import { UserInfo } from "../../models/user";
+import { useUser } from "../../context/UserContext";
 
 interface NavbarProps {
   isLoggedIn: boolean;
 }
 function Navbar(props: NavbarProps) {
-  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
-  
-  const location = useLocation();
-  // const [, setActiveButton] = useState("");
+  const { currentUser } = useUser(); 
 
   const currentPath = location.pathname;
   const currentActiveButton =
@@ -21,29 +16,12 @@ function Navbar(props: NavbarProps) {
       ? "signup"
       : "";
 
-  // const handleButtonClick = (button) => { setActiveButton(button);};
-
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
     navigate("/profile");
   };
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const user = await UserService.getCurrentUser();
-        setCurrentUser(user); 
-      } catch (error) {
-        console.error("Failed to fetch current user:", error);
-      }
-    };
-
-    if (props.isLoggedIn) {
-      fetchCurrentUser();
-    }
-  }, [props.isLoggedIn]);
-  
   return (
     <nav className="absolute top-0 left-0 flex justify-between items-center w-full mt-4 pb-2 h-[95px]  bg-transparent text-[#FFFFFF] px-16">
       <div className="flex items-center space-x-4">
@@ -113,7 +91,7 @@ function Navbar(props: NavbarProps) {
             >              
               <span className="font-medium text-[#FFFFFF]">{currentUser?.displayName || "Loading..."}</span>
               <img
-                src={avatar}
+                src={currentUser?.avatarUrl}
                 alt="User Avatar"
                 className="w-10 h-10 rounded-full"
               />

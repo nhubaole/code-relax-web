@@ -18,6 +18,7 @@ import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
 import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
+import { UserProvider } from "./context/UserContext";
 import Profile from "./components/profile/Profile";
 
 function App() {
@@ -77,11 +78,14 @@ function App() {
     );
   };
 
-  return (    
-    <Router>
-      <Layout />
-      <ToastContainer />
-    </Router>
+  return (
+    <UserProvider>
+      <Router>        
+        <Layout />
+        <ToastContainer />
+      </Router>
+    </UserProvider>
+      
   );
 }
 
