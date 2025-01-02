@@ -1,6 +1,5 @@
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, ChangeEvent} from "react";
 import { useNavigate } from "react-router-dom";
-import avatar from "../../assets/avatar.jpg";
 import account from "../../assets/user-rectangle.svg";
 import points from "../../assets/points.svg";
 import logout from "../../assets/logout.svg";
@@ -10,42 +9,60 @@ import DivAccount from "./Account";
 import DivPoints from "./Points";
 import Footer from "./Footer";
 import PracticeHistory from "./PracticeHistory";
-import UserService from '../../services/UserService';
-import { UserInfo } from '../../models/user';
-
+import { useUser } from "../../context/UserContext";
+import UserService from "../../services/UserService";
+import { UserUpdateRe, UserUpdateReq } from "../../models/user";
 interface ProfileProps {
   onLogoutSuccess: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
+    const { currentUser, setCurrentUser } = useUser(); 
   const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history">("account");
-  const [selectedImage, setSelectedImage] = useState<string>(avatar);
+  const [selectedImage, setSelectedImage] = useState<File | string>(currentUser?.avatarUrl || ''); 
+  const [previewSrc, setPreviewSrc] = useState<string>(currentUser?.avatarUrl || '');
+  
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
-
-  const getCurrentUser = async () => {
-    try {
-    const user = await UserService.getCurrentUser();
-    setCurrentUser(user); 
-    } catch (error) {
-    console.error("Failed to fetch current user:", error);
-    }
-  };
-
-  useEffect(() => {    
-    getCurrentUser();
-  }, []); 
-
-  const onUpdateSuccess = async () => {
-    getCurrentUser();
-  };
-
+  
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setSelectedImage(file); 
       const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
+      setPreviewSrc(imageUrl);
     }
+  };
+  
+  const convertUrlToFile = async (url: string, filename: string = 'image.png'): Promise<File> => {
+    const res = await fetch(url);
+    const blob = await res.blob(); 
+    const file = new File([blob], filename, { type: blob.type });
+    return file;
+  };
+  
+  const handleAvatar = async (selectedImage: File | string) => {
+    if (selectedImage instanceof File) {
+      return selectedImage; 
+    }  
+    return await convertUrlToFile(selectedImage);
+  };
+
+  const onUpdateSuccess = async (userUpdateRe: UserUpdateRe) => {
+    const userUpdateReq: UserUpdateReq = {
+      id: userUpdateRe?.id || 0,
+      displayName: userUpdateRe?.displayName || "",
+      email: userUpdateRe?.email || "",
+      password: userUpdateRe?.password || "",
+      role: userUpdateRe?.role || 0,
+      google: userUpdateRe?.google || "",
+      github: userUpdateRe?.github || "",
+      facebook: userUpdateRe?.facebook|| "",
+      avatar:  await handleAvatar(selectedImage),
+  }; 
+    console.log('update:',userUpdateReq);
+    await UserService.updateUser(userUpdateReq);
+    const updatedUser = await UserService.getCurrentUser();
+    setCurrentUser(updatedUser);      
   };
 
 
@@ -61,8 +78,8 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
         <div className="flex-none px-10 w-72">
           <div className="relative">
             <img
-              className="w-full rounded-full"
-              src={selectedImage}
+              className="rounded-full w-[210px] h-[210px]"
+              src={previewSrc}
               alt="Avatar"
             />
             <button
@@ -149,10 +166,9 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1">
           {activeDiv === "account" ? (
-            <DivAccount currentUser={currentUser} onUpdateSuccess={onUpdateSuccess} />
+            <DivAccount onUpdateSuccess={onUpdateSuccess}  />
           ) : activeDiv === "points" ? (
             <DivPoints />
           ) : (

@@ -1,19 +1,22 @@
 import Footer from "../profile/Footer";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import arrange from "../../assets/arrange.svg"
-import avatar from "../../assets/avatar.jpg"
+import { LeaderBoardReq } from '../../models/user';
+import UserService from "../../services/UserService";
+import { useUser } from "../../context/UserContext";
 
 const Top: React.FC <{
     name: string; 
+    userAvatar:string;
     submissions: number; 
     percent: number; 
-    solved: number }> = ({ name, submissions, percent, solved}) => {
+    solved: number }> = ({ name, userAvatar, submissions, percent, solved}) => {
     return (
         <div className="bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl shadow-2xl flex flex-col h-[280px] w-[450px] mt-6 border-l-[6px] border-[#F4AB04]">
             <div className="flex items-center flex-none w-full ">
                 <img
                     className="flex-none object-cover w-[140px] rounded-full h-[140px]"
-                    src={avatar}
+                    src={userAvatar}
                     alt="icon"
                 />
                 <div className="flex flex-col ml-2">
@@ -39,16 +42,17 @@ const Top: React.FC <{
 
 const TopRank: React.FC <{
     name: string; 
+    userAvatar: string;
     submissions: number; 
     percent: number; 
     solved: number 
-    color: string }> = ({ name, submissions, percent, solved, color}) => {
+    color: string }> = ({ name, userAvatar, submissions, percent, solved, color}) => {
     return (
         <div className={`bg-[#ffffff] bg-opacity-10 px-2 py-4 rounded-xl shadow-2xl flex flex-col h-[180px] w-[308px] mt-6 border-l-[6px]`} style={{ borderColor: color }}> 
             <div className="flex items-center flex-none w-full ">
                 <img
                     className="flex-none object-cover w-[50px] rounded-full h-[50px]"
-                    src={avatar}
+                    src={userAvatar}
                     alt="icon"
                 />
                 <div className="flex flex-col ml-2">
@@ -74,11 +78,11 @@ const TopRank: React.FC <{
 
 const Leaderboard: React.FC <{
     rank: number; 
-    name: string; 
+    userName: string; 
+    userAvatar: string;
     submission: number; 
     solved: number;
-    acceptance: number;  }> = ({ rank, name, submission, solved, acceptance }) => {
-    
+    acceptance: number;  }> = ({ rank, userName, userAvatar, submission, solved, acceptance }) => {    
     return (
         <div className="flex w-full px-2 py-2 border-b border-blacklight">
             <div className="flex flex-1">
@@ -89,10 +93,10 @@ const Leaderboard: React.FC <{
             <div className="flex w-2/5">
                 <img
                     className="flex-none object-cover w-[40px] h-[40px] mt-1 rounded-full"
-                    src={avatar}
+                    src={userAvatar}
                     alt="icon"
                 />
-                <span className="text-left mt-auto mb-auto ml-3 text-[#FFFFFF]">{name}  </span>   
+                <span className="text-left mt-auto mb-auto ml-3 text-[#FFFFFF]">{userName}  </span>   
             </div>
             <div className="flex flex-1">
                 <span className="text-left mt-auto mb-auto ml-1 text-[#FFFFFF]">{submission}</span>   
@@ -114,6 +118,21 @@ interface LeaderboardProps {
   }
   
 const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
+    const { currentUser } = useUser(); 
+    const [leaderBoard, setLeaderBoard] = useState<LeaderBoardReq | null>(null);
+
+    const getLeaderBoard = async () => {
+      try {
+      const lb = await UserService.getLeaderBoard();
+      setLeaderBoard(lb); 
+      } catch (error) {
+      console.error("Failed to fetch current user:", error);
+      }
+    };
+    
+    useEffect(() => {    
+        getLeaderBoard();
+    }, []); 
     return (
         <div className="relative flex flex-col min-h-screen bg-gradient-to-l from-green-500 to-textcolorlight">            
             <div className="flex-col flex-grow px-16 py-2 mt-28">
@@ -121,13 +140,13 @@ const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
                     <div className="flex items-center flex-none w-full h-[200px] pb-20 border-b border-[#FFFFFF] border-opacity-40 p-8">
                         <img
                             className="rounded-full w-[190px] h-[190px]"
-                            src={avatar}
+                            src={leaderBoard?.userAvatar}
                             alt="icon"
                         />
                         <div className="flex flex-col ml-10">
-                            <span className="font-bold text-left text-5xl text-[#FFFFFF]">HaAnh</span>
+                            <span className="font-bold text-left text-5xl text-[#FFFFFF]">{leaderBoard?.userName}</span>
                             <span className="text-xl mt-6 text-left text-[#FFFFFF]">
-                                <span className="text-yellow-500">RANK: </span>147
+                                <span className="text-yellow-500">RANK: </span>{leaderBoard?.rank}
                             </span>
                         </div>   
                     </div>
@@ -135,26 +154,35 @@ const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
                 
                 <div className="flex-grow ">
                     <div className="flex items-center space-x-28">
-                        <Top
-                            name="John Doe"
-                            submissions={100}
-                            solved={49}
-                            percent={99}                            
-                        />
-                        <TopRank
-                            name="John Doe"
-                            submissions={100}
-                            solved={49}
-                            percent={99}
-                            color="#FFFFFF"   
-                        />
-                        <TopRank
-                            name="John Doe"
-                            submissions={100}
-                            solved={49}
-                            percent={99}  
-                            color="#F4AB04"   
-                        />
+                        {leaderBoard?.listUser && leaderBoard.listUser.length > 0 && (
+                            <Top
+                                name={leaderBoard.listUser[0].userName || ''}
+                                userAvatar={leaderBoard.listUser[0].userAvatar || ''}
+                                submissions={leaderBoard.listUser[0].totalSubmission || 0}
+                                solved={leaderBoard.listUser[0].totalSolved || 0}
+                                percent={leaderBoard.listUser[0].acceptance || 0}
+                            />
+                        )}
+                        {leaderBoard?.listUser && leaderBoard.listUser.length > 1 && (
+                            <TopRank
+                                name={leaderBoard?.listUser[1].userName || ''}
+                                userAvatar={leaderBoard.listUser[1].userAvatar || ''}
+                                submissions={leaderBoard?.listUser[1].totalSubmission || 0}
+                                solved={leaderBoard?.listUser[1].totalSolved || 0}
+                                percent={leaderBoard?.listUser[1].acceptance || 0}  
+                                color="#FFFFFF"   
+                            />
+                        )}
+                        {leaderBoard?.listUser && leaderBoard.listUser.length > 2 && (
+                            <TopRank
+                                name={leaderBoard?.listUser[2].userName || ''}
+                                userAvatar={leaderBoard.listUser[2].userAvatar || ''}
+                                submissions={leaderBoard?.listUser[2].totalSubmission || 0}
+                                solved={leaderBoard?.listUser[2].totalSolved || 0}
+                                percent={leaderBoard?.listUser[2].acceptance || 0}    
+                                color="#F4AB04"   
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -181,13 +209,14 @@ const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
                             </div>
 
                             <div className="flex flex-col overflow-y-auto max-h-[680px]">
-                                {leaderboard.map((lb) => (
+                                {leaderBoard?.listUser.map((user) => (
                                     <Leaderboard 
-                                        rank={lb.rank} 
-                                        name={lb.name}  
-                                        submission={lb.submission} 
-                                        solved={lb.solved}  
-                                        acceptance={lb.acceptance} 
+                                        rank={user.rank} 
+                                        userName={user.userName}  
+                                        userAvatar={user.userAvatar}  
+                                        submission={user.totalSubmission} 
+                                        solved={user.totalSolved}  
+                                        acceptance={user.acceptance} 
                                     />
                                 ))}
                             </div>
@@ -200,17 +229,5 @@ const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
         </div>   
     );
 };
-
-const leaderboard = [
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-    { rank: 1, name: "Solve Me First", submission: 100, solved: 49, acceptance: 53.8 },
-];
 
 export default LeaderBoard;

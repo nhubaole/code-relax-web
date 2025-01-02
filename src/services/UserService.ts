@@ -20,7 +20,10 @@ export default class UserService {
     try {
       const res = await apiClient.post(url, req);
       const token = res.data?.data?.token;
-      localStorage.setItem('token', token);  
+      if (token) {
+        localStorage.removeItem('token'); 
+        localStorage.setItem('token', token);  
+      } 
       return res;
     } catch (error) {
       throw error;
@@ -31,10 +34,6 @@ export default class UserService {
     const url = USER_ENDPOINT + '/CurrentUser'; 
     try {
       const token = localStorage.getItem('token'); 
-      if (!token) {
-        throw new Error('No token found'); 
-      }
-  
       const res = await apiClient.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`, 
@@ -49,24 +48,45 @@ export default class UserService {
 
   static async updateUser(req: UserUpdateReq) {
     const url = USER_ENDPOINT + `/${req.id}`;
-    const token = localStorage.getItem('token');    
-    console.log("User updated:", req);
-    console.log("User updated:", url);
-    if (!token) {
-        throw new Error('No token found');
-    }
+    const token = localStorage.getItem('token');
+
+    const formData = new FormData();
+    formData.append("Id", req.id.toString());
+    formData.append("DisplayName", req.displayName);
+    formData.append("Email", req.email);
+    formData.append("Password", req.password);
+    formData.append("Role", req.role.toString());
+    formData.append("formFile", req.avatar); 
+    formData.append("Google", req.google);
+    formData.append("Github", req.github); 
+    formData.append("Facebook", req.facebook); 
 
     try {
-        const res = await apiClient.put(url, req, {
-          headers: {
-              'Authorization': `Bearer ${token}`,
-          },
+        const res = await apiClient.put(url, formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
         });
-        console.log("User updated:", res);
         return res;
     } catch (error) {
         console.error("Failed to update user:", error);
         throw error;
     }
   }
+
+  static async getLeaderBoard() {
+    const url = USER_ENDPOINT + '/LeaderBoard'; 
+    try {
+      const token = localStorage.getItem('token'); 
+      const res = await apiClient.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+        },
+      });
+      return res.data?.data; 
+    } catch (error) {
+      console.error('Failed to fetch current user:', error);
+      throw error;
+    }
+  }  
 }

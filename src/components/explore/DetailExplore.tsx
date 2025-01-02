@@ -2,7 +2,6 @@ import Footer from "../profile/Footer";
 import quizs from "../../assets/quizs.svg";
 import icquestion from "../../assets/question.svg";
 import down from "../../assets/direction_down.svg";
-import image from "../../assets/detailexplore.png";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ArticleService from "../../services/ArticleService";
@@ -16,7 +15,7 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
     // eslint-disable-next-line no-constant-binary-expression
     const id = Number(query.get('id')) ?? 1;
     const [isVisible, setIsVisible] = useState(false);
-    const [selectedAnswer, setSelectedAnswer] = useState({});
+    const [selectedAnswer, setSelectedAnswer] = useState<string[]>([]); 
     const [isSubmit, setIsSubmit] = useState(false);
     const [correctAns, setCorrectAns] = useState(0);
     const [article, setArticle] = useState<ArticleByIdReq | null>(null);
@@ -45,24 +44,26 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
         let correctCount = 0;
         Object.entries(selectedAnswer).forEach(([index, answer]) => {
             const question = article.quizzes[parseInt(index)];
-            if (question) {
-                const correctAnswer = question.correctOption;
-                const selectedAnswerContent = question[answer];    
-                if (correctAnswer === selectedAnswerContent) {
+            if (question) {  
+                if (question.correctOption === answer) {
                     correctCount++; 
                 }
             }
+            console.log("select:",answer);
+            console.log("select:",question.correctOption);
         });
         setCorrectAns(correctCount);
         console.log(`Kết quả: ${correctCount}/${article.quizzes.length} câu đúng.`);
     };
-           
-    const handleOptionClick = (index: number, optionKey: string) => {
-        setSelectedAnswer((prev) => ({
-          ...prev,
-          [index]: optionKey, // Đảm bảo optionValue là string
-        }));
-      };
+
+    const handleOptionClick = (index, option) => {
+        const selectedOption = ['A', 'B', 'C', 'D'][option]; 
+        setSelectedAnswer(prevState => {
+            const newSelectedAnswer = [...prevState];
+            newSelectedAnswer[index] = selectedOption;
+            return newSelectedAnswer;
+        });
+    };
 
     const handleQuizs = () => {
         setIsVisible(!isVisible);
@@ -140,17 +141,18 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
                                     </div>
 
                                     <div>
-                                        {['optionA', 'optionB', 'optionC', 'optionD'].map((key) => {
+                                        {['optionA', 'optionB', 'optionC', 'optionD'].map((key, idx) => {
                                             const value = q[key as keyof Quiz]; 
-                                            const isSelected = selectedAnswer[index] === key;
-                                            const isCorrect = value === q.correctOption;
-                                            
+                                            const selectedOption = selectedAnswer[index]; // Giá trị là 'A', 'B', 'C', hoặc 'D'
+                                            const isSelected = selectedOption === ['A', 'B', 'C', 'D'][idx];
+                                            const isCorrect = q.correctOption === ['A', 'B', 'C', 'D'][idx]; // So sánh với đáp án đúng
+
                                             const buttonClass = isSubmit
                                                 ? isCorrect
-                                                    ? "border-green-500"
-                                                    : isSelected
-                                                        ? "border-red"
-                                                        : "border-[#FFFFFF]"
+                                                ? "border-green-500"
+                                                : isSelected
+                                                    ? "border-red"
+                                                    : "border-[#FFFFFF]"
                                                 : isSelected
                                                     ? "bg-purple-500"
                                                     : "";
@@ -159,7 +161,7 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
                                                 <button
                                                     key={key}
                                                     className={`w-full mt-4 border rounded-lg px-4 py-2 text-left ${buttonClass}`}
-                                                    onClick={() => !isSubmit && handleOptionClick(index, key)}
+                                                    onClick={() => !isSubmit && handleOptionClick(index, idx)} // Dùng idx thay vì key
                                                     disabled={isSubmit}>
                                                     <label htmlFor={key} className="ml-2">{value}</label>
                                                 </button>
@@ -177,10 +179,10 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
                             ))}
 
                             <button 
-                            className="mt-10 ml-auto bg-yellow-300 text-black w-[200px] rounded-2xl py-1 flex items-center justify-center"
-                            onClick={handleSubmit}
-                            style={{ display: isSubmit ? "none" : "flex" }}>
-                                Submit
+                                className="mt-10 ml-auto bg-yellow-300 text-black w-[200px] rounded-2xl py-1 flex items-center justify-center"
+                                onClick={handleSubmit}
+                                style={{ display: isSubmit ? "none" : "flex" }}>
+                                    Submit
                             </button>
                         </div>
                     )}

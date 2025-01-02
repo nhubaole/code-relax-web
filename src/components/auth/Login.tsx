@@ -1,34 +1,37 @@
 import { Link, useNavigate } from "react-router-dom";
 import home from "../../assets/home.png";
-import { UserLogInReq } from "../../models/user";
 import UserService from "../../services/UserService";
 import PasswordInput from "./InputPassword";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useUser } from "../../context/UserContext";
 interface LogInProps {
-  onLoginSuccess: () => void; 
+  onLoginSuccess: () => void;
 }
 
 const LogIn: React.FC<LogInProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { setCurrentUser } = useUser(); 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogIn = async (e: React.FormEvent) => {
-    e.preventDefault();        
-    const logInData: UserLogInReq = {email, password};
+    e.preventDefault();
+
+    const logInData = { email, password };
+
     try {
-      UserService.logIn(logInData);
-      onLoginSuccess();
-      navigate("/");
+      await UserService.logIn(logInData);
+      const user = await UserService.getCurrentUser();
+      setCurrentUser(user);
+      onLoginSuccess(); 
+      navigate('/'); 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error("Login failed! Incorrect email or password.", { position: "top-right", autoClose: 1500 });
+      toast.error('Login failed! Incorrect email or password.', { position: 'top-right', autoClose: 1500 });
     }
   };
-  
 
   return (
     <div className="relative ">
