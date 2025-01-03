@@ -18,7 +18,7 @@ export default  class ArticleService {
         }
     }
 
-    async getAll(token: string| null) {
+    async getAll(token: string) {
       const url = ARTICLE_ENDPOINT;
       try {
         const res = await apiClient.get(url, {

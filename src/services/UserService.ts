@@ -15,25 +15,19 @@ export default class UserService {
     }
   }  
 
-  static async logIn(req: UserLogInReq) {
+  async logIn(req: UserLogInReq) {
     const url = AUT_ENDPOINT + '/Login';
     try {
       const res = await apiClient.post(url, req);
-      const token = res.data?.data?.token;
-      if (token) {
-        localStorage.removeItem('token'); 
-        localStorage.setItem('token', token);  
-      } 
       return res;
     } catch (error) {
       throw error;
     }
   }
   
-  static async getCurrentUser() {
+  async getCurrentUser(token: string) {
     const url = USER_ENDPOINT + '/CurrentUser'; 
     try {
-      const token = localStorage.getItem('token'); 
       const res = await apiClient.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`, 
@@ -46,9 +40,8 @@ export default class UserService {
     }
   }  
 
-  static async updateUser(req: UserUpdateReq) {
+  async updateUser(req: UserUpdateReq, token:string) {
     const url = USER_ENDPOINT + `/${req.id}`;
-    const token = localStorage.getItem('token');
 
     const formData = new FormData();
     formData.append("Id", req.id.toString());

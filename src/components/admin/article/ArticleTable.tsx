@@ -5,12 +5,16 @@ import ArticleService from "../../../services/ArticleService";
 import { ArticleRes } from "../../../models/article";
 import { Button, Dropdown, Menu } from "antd";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { useCookies } from "react-cookie";
 
-
-
-const ArticleTable = () => {
+type ArticleTableProps = {
+  searchKeyword: string; // Thêm prop cho từ khóa tìm kiếm
+};
+const ArticleTable = ({ searchKeyword }: ArticleTableProps) => {
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
   const [articles, setArticles] = useState<ArticleRes[]>([])
-  const token = localStorage.getItem('token');
+  const [filteredArticles, setFilteredArticles] = useState<ArticleRes[]>([]);
   useEffect(()=>{
     const fetchProblems = async () => {
       try{
@@ -19,6 +23,7 @@ const ArticleTable = () => {
         const response = await articleService.getAll(token);
         const data = response.data;
         setArticles(data.data);
+        setFilteredArticles(data.data); 
       }catch (error: any) {
         toast.error(error.message || "Fail to load problems.");
       }
@@ -27,6 +32,17 @@ const ArticleTable = () => {
     fetchProblems();
   }
   ,[])
+
+  useEffect(() => {
+    // Lọc bài viết dựa trên từ khóa tìm kiếm
+    const filtered = articles.filter((article) =>
+      article.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      article.summary.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+    setFilteredArticles(filtered);
+  }, [searchKeyword, articles]);
+
+
   const renderActionsMenu = (article: ArticleRes) => (
     <Menu>
       <Menu.Item key="edit" >
@@ -50,7 +66,7 @@ const ArticleTable = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-[#A2A1A833]">
-          {articles.map((article, index) => (
+          {filteredArticles.map((article, index) => (
             <tr
               key={index}
               className="hover:bg-gray-800 transition-colors duration-200"

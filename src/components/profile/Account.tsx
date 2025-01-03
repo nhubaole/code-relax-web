@@ -3,34 +3,46 @@ import facebook from "../../assets/facebook.svg";
 import github from "../../assets/github.svg";
 import google from "../../assets/google.svg";
 import { UserUpdateRe } from '../../models/user';
-import { useUser } from '../../context/UserContext';
+import { useAppStore } from '../../store';
 interface DivAccountProps {
     onUpdateSuccess: (updateData: UserUpdateRe) => void;
 }
   
 const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
-    const { currentUser } = useUser(); 
+    const { userInfo, setUserInfo } = useAppStore(); 
     const [isEditing, setIsEditing] = useState(false);
+
+    const [formData, setFormData] = useState({
+        displayName: userInfo?.displayName || "",
+        email: userInfo?.email || "",
+        password: userInfo?.password || "",
+        google: userInfo?.google || "",
+        github: userInfo?.github || "",
+        facebook: userInfo?.facebook || "",
+    });
+
+    // Hàm xử lý thay đổi input
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData({ ...formData, [id]: value });
+    };
 
     const handleEditClick = async () => {
         if (isEditing) {            
             try {
-                const name = (document.getElementById('_name') as HTMLInputElement).value;
-                const password = (document.getElementById('_password') as HTMLInputElement).value;
-                const email = (document.getElementById('_email') as HTMLInputElement).value;
-                const google = (document.getElementById('_google') as HTMLInputElement).value;
-                const github = (document.getElementById('_github') as HTMLInputElement).value;
-                const facebook = (document.getElementById('_facebook') as HTMLInputElement).value;
+
                 const updateData: UserUpdateRe = {
-                    id: currentUser?.id || 0,
-                    displayName: name,
-                    email: email,
-                    password: password,
-                    role: currentUser?.role || 0,
-                    google: google,
-                    github: github,
-                    facebook: facebook,
+                    id: userInfo?.id || 0,
+                    displayName: formData.displayName || userInfo?.displayName,
+                    email: formData.email || userInfo.email,
+                    password: formData.password || userInfo.password,
+                    role: userInfo?.role || 0,
+                    google: formData.google || userInfo.google,
+                    github: formData.github || userInfo.github,
+                    facebook: formData.facebook || userInfo.facebook,
                 };                
+
+                console.log(updateData)
                 setIsEditing(!isEditing);
                 onUpdateSuccess(updateData);
             } catch (error) {
@@ -50,10 +62,11 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                 <div className="flex flex-1 p-1.5">
                     <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">DisplayName</span>   
                     <input
-                        id='_name'
+                        id='displayName'
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 bg-opacity-0 text-sm border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue={currentUser?.displayName}
+                        defaultValue={userInfo?.displayName}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />      
@@ -64,10 +77,11 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                 <div className="flex flex-1 p-1.5 w-15">
                     <span className="flex-none w-96 text-sm text-left text-[#FFFFFF]">Email</span>
                     <input
-                        id='_email'
+                        id='email'
                         type="text"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue={currentUser?.email}
+                        defaultValue={userInfo?.email}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />               
@@ -78,10 +92,11 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                 <div className="flex flex-1 p-1.5 w-15">
                     <span className="flex-none text-sm w-96 text-left text-[#FFFFFF]">Password</span>
                     <input
-                        id='_password'
+                        id='password'
                         type="password"
                         className={`w-full bg-[#FFFFFF] px-12 text-sm bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
-                        defaultValue={currentUser?.password}
+                        defaultValue={userInfo?.password}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />   
@@ -98,11 +113,12 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                     <img src={google} alt="Icon" className="w-6 h-6 mr-2" /> 
                     <span className="mt-0.5 flex-none text-sm w-96 text-left text-[#FFFFFF]">Google</span>   
                     <input
-                        id='_google'
+                        id='google'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF]  bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder="Your Google username or url"
-                        defaultValue={currentUser?.google}
+                        defaultValue={userInfo?.google}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />      
@@ -114,11 +130,12 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                     <img src={github} alt="Icon" className="w-6 h-6 mr-2" /> 
                     <span className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Github</span>
                     <input
-                        id='_github'
+                        id='github'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder="Your Github username or url"
-                        defaultValue={currentUser?.github}
+                        defaultValue={userInfo?.github}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />               
@@ -130,11 +147,12 @@ const DivAccount = ({ onUpdateSuccess }: DivAccountProps) => {
                     <img src={facebook} alt="Icon" className="w-6 h-6 mr-2" /> 
                     <span className="mt-0.5 flex-none w-96 text-sm text-left text-[#FFFFFF]">Facebook</span>
                     <input
-                        id='_facebook'
+                        id='facebook'
                         type="text"
                         className={`w-full text-sm bg-[#FFFFFF] bg-opacity-0 border-none focus:outline-none ${isEditing ? "text-green-300" : "text-[#FFFFFF]"}`}                            
                         placeholder='Your Facebook username or url'                        
-                        defaultValue={currentUser?.facebook}
+                        defaultValue={userInfo?.facebook}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         required
                     />   
