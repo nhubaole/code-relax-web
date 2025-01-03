@@ -145,7 +145,7 @@ const Playground = (prop: PlaygroundProps) => {
       const data = response.data;
       console.log(data.statusCode);
 
-      if (data.statusCode === 0) {
+      if (data.data.success) {
         toast.success("Congratulation, all testcases passed!");
       } else {
         toast.error(data.message);

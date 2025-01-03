@@ -47,10 +47,10 @@ const SubmissionDetail = (prop: SubmissionDetailProps) => {
           <div>
             <h2
               className={`text-lg font-semibold ${
-                prop.submission.status == 0 ? "text-green-300" : "text-red"
+                prop.submission.status == 1 ? "text-green-300" : "text-red"
               } `}
             >
-              {prop.submission.status == 0 ? "ACCEPTED" : "WRONG ANSWER"}
+              {prop.submission.status == 1 ? "ACCEPTED" : "WRONG ANSWER"}
             </h2>
             <p className="text-xs text-gray">submitted at {formatDateTime(prop.submission.createdAt)}</p>
           </div>

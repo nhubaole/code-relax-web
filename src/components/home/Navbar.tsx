@@ -22,10 +22,14 @@ function Navbar(props: NavbarProps) {
     navigate("/profile");
   };
 
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
   return (
     <nav className="absolute top-0 left-0 flex justify-between items-center w-full mt-4 pb-2 h-[95px]  bg-transparent text-[#FFFFFF] px-16">
       <div className="flex items-center space-x-4">
-        <div className="flex">
+        <div className="flex cursor-pointer" onClick={handleLogoClick}>
           <h2 className="text-2xl font-bold text-[#FFFFFF]">CODE</h2>
           <h2 className="text-2xl font-bold text-green-300">RELAX</h2>
         </div>
