@@ -24,10 +24,10 @@ export default class PackageService {
     }
   }
 
-  static async getAllProblem() {
+  static async getAllProblem(token: string) {
     const url = PROBLEM_ENDPOINT;
     try {
-      const token = localStorage.getItem('token');
+
       const res = await apiClient.get(url, {
         headers: {
             'Authorization': `Bearer ${token}`,

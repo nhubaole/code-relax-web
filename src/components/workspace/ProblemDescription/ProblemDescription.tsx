@@ -22,6 +22,7 @@ import { RatingRes } from "../../../models/rating";
 import RatingService from "../../../services/RatingService";
 import { USER_DEFAULT_AVATAR } from "../../../utils/constants";
 import { Rate } from "antd";
+import { useCookies } from "react-cookie";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -33,7 +34,8 @@ type ProblemDescriptionProps = {
 const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [isRatingsOpen, setIsRatingsOpen] = useState(false);
-  const token = localStorage.getItem('token');
+  const [cookie, , removeCookie] = useCookies(["token"]);
+  const token = cookie.token
   const toggleDiscussion = () => setIsDiscussionOpen(!isDiscussionOpen);
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);

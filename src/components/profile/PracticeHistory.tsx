@@ -2,17 +2,19 @@ import { useEffect, useState } from "react";
 import { SubmissionRes, SubmissionStatisticRes } from "../../models/submission";
 import SubmissionService from "../../services/SubmissionService";
 import { formatDateTime } from "../../utils/formatter";
+import { useAppStore } from "../../store";
 
 const tags = ["Easy", "Medium", "Hard"];
 
 const PracticeHistory = () => {
   const [submissions, setSubmissions] = useState<SubmissionRes[]>([]);
   const [statistic, setstatistic] = useState<SubmissionStatisticRes>();
+  const {userInfo} = useAppStore();
   useEffect(() => {
     const fetchSubmission = async () => {
       const submissionService = new SubmissionService();
 
-      const response = await submissionService.getByUserID(3);
+      const response = await submissionService.getByUserID(userInfo.id);
       const data = response.data;
       setSubmissions(data.data);
     };
@@ -20,7 +22,7 @@ const PracticeHistory = () => {
     const fetchStatistic = async () => {
       const submissionService = new SubmissionService();
 
-      const response = await submissionService.getStatisticByUserID(3);
+      const response = await submissionService.getStatisticByUserID(userInfo.id);
       const data = response.data;
       setstatistic(data.data);
     };

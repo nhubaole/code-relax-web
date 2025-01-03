@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Radio, Upload } from "antd";
 import ArticleService from "../../../../services/ArticleService";
 import { toast } from "react-toastify";
+import { useCookies } from "react-cookie";
 
 
 const CreateArticleForm: React.FC = () => {
@@ -11,7 +12,8 @@ const CreateArticleForm: React.FC = () => {
   const [quizQuestions, setQuizQuestions] = useState<any[]>([]); // Thay vì questions
   const [title, setTitle] = useState<string>("")
   const [summary, setSummary] = useState<string>("")
-  const token = localStorage.getItem("token");
+  const [cookie] = useCookies(["token"]);
+  const token = cookie.token
   console.log(inputFields)
   console.log(quizQuestions)  
   console.log(fieldData)
@@ -54,7 +56,7 @@ const CreateArticleForm: React.FC = () => {
         };
 
         console.log(quizData)
-        await articleService.createQuiz(quizData, token!);
+        await articleService.createQuiz(quizData, token);
       }
       toast.success("Article created successfully!");
     } catch (error) {

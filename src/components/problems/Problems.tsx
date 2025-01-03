@@ -13,6 +13,7 @@ import search from "../../assets/search.svg"
 import PackageService from "../../services/PackageService";
 import { Package, ProblemInfor, Tag } from "../../models/package";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const PackageTag = ({ content }: { content: string }) => {
     return (
@@ -152,6 +153,8 @@ const Problems = () => {
     const [tags, setTags] = useState<Tag[]>([]);
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [pkName, setPkName] = useState<string>('All Problems');
+    const [cookie, , removeCookie] = useCookies(["token"]);
+    const token = cookie.token 
     const [filters, setFilters] = useState({
         textSearch: '',
         tag: [] as string[],
@@ -183,7 +186,7 @@ const Problems = () => {
 
         const fetchAllProblems = async () => {
             try {
-                const data = await PackageService.getAllProblem();
+                const data = await PackageService.getAllProblem(token);
                 setOriginalProblems(data);               
                 setProblems(data);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars

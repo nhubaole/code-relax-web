@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import ArticleService from "../../services/ArticleService";
 import { ArticleByIdReq, Quiz } from "../../models/article";
+import { useCookies } from "react-cookie";
 interface DeatailExploreProps {
   isLoggedIn: boolean;
 }
@@ -17,7 +18,8 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
   const [isSubmit, setIsSubmit] = useState(false);
   const [correctAns, setCorrectAns] = useState(0);
   const [article, setArticle] = useState<ArticleByIdReq | null>(null);
-  const token = localStorage.getItem("token");
+  const [cookie, , removeCookie] = useCookies(["token"]);
+  const token = cookie.token
 
   useEffect(() => {
     const fetchArticle = async () => {

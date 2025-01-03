@@ -74,10 +74,14 @@ export default  class ProblemService {
       }
     }
 
-    async createProblem(req: CreateProblemReq){
+    async createProblem(req: CreateProblemReq, token: string){
       const url = PROBLEM_ENDPOINT + '/CreateProblem'
       try {
-        const res = await apiClient.post(url, req)
+        const res = await apiClient.post(url, req,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         return res;
       } catch (error) {
         throw error;

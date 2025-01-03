@@ -75,10 +75,10 @@ async createQuiz(req: any, token: string| null) {
         throw error;
       }
     }
-    async getAllArticle() {
+    async getAllArticle(token: string) {
       const url = ARTICLE_ENDPOINT;
       try {
-        const token = localStorage.getItem('token');
+   
         const res = await apiClient.get(url, {
           headers: {
               'Authorization': `Bearer ${token}`,
@@ -91,10 +91,10 @@ async createQuiz(req: any, token: string| null) {
       }
     }
   
-    static async getArticleById(id: number) {
+    static async getArticleById(id: number, token: string) {
       const url = ARTICLE_ENDPOINT + `/${id}`;
       try {
-        const token = localStorage.getItem('token');
+  
         const res = await apiClient.get(url, {
           headers: {
               'Authorization': `Bearer ${token}`,

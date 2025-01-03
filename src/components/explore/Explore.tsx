@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArticleGetAllReq } from "../../models/article";
 import { useEffect, useState } from "react";
 import ArticleService from "../../services/ArticleService";
+import { useCookies } from "react-cookie";
 
 const Topic: React.FC<{
   id: number;
@@ -51,7 +52,8 @@ const renderTopics = (startIndex: number, topics: ArticleGetAllReq[]) => {
 
 const Explore = () => {
   const [topics, setTopics] = useState<ArticleGetAllReq[]>([]);
-  const token = localStorage.getItem("token");
+  const [cookie, , removeCookie] = useCookies(["token"]);
+  const token = cookie.token
 
   useEffect(() => {
     const fetchArticles = async () => {
