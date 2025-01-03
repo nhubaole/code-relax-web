@@ -345,6 +345,7 @@ const CreateProblemForm: React.FC = () => {
         {testCaseFields.map((field, index) => (
           <div key={index} className="mb-4">
             <Input
+              value={currentParams[field] || ""}
               placeholder={fieldValues[field] || field}
               onChange={(e) => handleFieldChange(field, e.target.value)}
               className="p-2 rounded-lg bg-[#16151C] text-white"
@@ -352,6 +353,7 @@ const CreateProblemForm: React.FC = () => {
           </div>
         ))}
          <Input
+              value={output || ""}
               placeholder="Output"
               onChange={(e) => handleFieldChange("Output", e.target.value)}
               className="p-2 rounded-lg bg-[#16151C] text-white"
