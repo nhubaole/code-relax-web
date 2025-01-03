@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import { RatingRes } from "../../../models/rating";
 import RatingService from "../../../services/RatingService";
 import { USER_DEFAULT_AVATAR } from "../../../utils/constants";
+import { Rate } from "antd";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -37,6 +38,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
   const [newDiscussion, setNewDiscussion] = useState("");
+  const [newRating, setNewRating] = useState(0);
   const [rating, setRating] = useState<RatingRes[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   
@@ -87,9 +89,10 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     fetchRating(prop.problem.id);
   },[]);
 
+  const handleRatingChange = (value: number) => {
+    setNewRating(value)
+  };
   const handleCreateDiscussion = async () => {
-   
-
     try {
       const discussionService = new DiscussionService();
 
@@ -146,7 +149,33 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       );
     }
   };
-  console.log(rating);
+
+  const handleCreateRating = async () => {
+    try {
+      const ratingService = new RatingService();
+
+      let payload = {
+          numberOfStar: newRating,
+          userID: 3,
+          problemID: prop.problem.id,
+        };
+      
+      const createResponse = await ratingService.create(payload, token);
+
+      if (createResponse.status === 201) {
+        toast.success("Create successfully")
+        setSelectedImage(null)
+      } else {
+        toast.error("Failed to create discussion. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating discussion:", error);
+      toast.error(
+        "Error occurred while creating discussion. Please try again."
+      );
+    }
+  };
+  console.log(newRating);
   const totalStars = rating?.reduce((acc, curr) => acc + curr.numberOfStar, 0) || 0;
   const totalReviews = rating?.length || 0;
   const overall = totalReviews === 0 ? 0 : totalStars / totalReviews || 0;
@@ -210,10 +239,17 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
               ))}
             </div>
             <div className="flex items-center mt-3">
-              <div className="flex space-x-1 cursor-pointer rounded p-[3px] text-xl transition-colors duration-200 text-[#FFF]">
-                {[...Array(5)].map((_, index) => (
-                  <TiStarOutline key={index} className="text-[#FFF]" />
-                ))}
+              <div className="flex space-x-6  items-center cursor-pointer rounded  text-xl transition-colors duration-200 text-[#FFF]">
+              <Rate
+              className="text-yellow custom-rate"
+                onChange={(value) =>handleRatingChange(value)}
+              />
+               <button
+               onClick={handleCreateRating}
+                className=" text-white text-base underline rounded"
+              >
+                Rate
+              </button>
               </div>
             </div>
 

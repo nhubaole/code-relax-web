@@ -17,3 +17,9 @@ export interface RatingRes {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface CreateRatingReq {
+    numberOfStar: number;
+    problemID: number;
+    userID: number;
+}
