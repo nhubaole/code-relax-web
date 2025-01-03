@@ -60,7 +60,7 @@ function Navbar(props: NavbarProps) {
         >
           Explore
         </Link>
-        <Link
+        {/* <Link
           to="/"
           className={`hover:text-green-600 ${
             location.pathname === "/community"
@@ -69,7 +69,7 @@ function Navbar(props: NavbarProps) {
           }`}
         >
           Community
-        </Link>
+        </Link> */}
         <Link
           to="/leaderboard"
           className={`hover:text-green-600 ${

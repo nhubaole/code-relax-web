@@ -12,10 +12,7 @@ import star from "../../assets/Star.svg"
 import search from "../../assets/search.svg"
 import PackageService from "../../services/PackageService";
 import { Package, ProblemInfor, Tag } from "../../models/package";
-import { ProblemRes } from "../../models/problem";
 import { useNavigate } from "react-router-dom";
-import ProblemService from "../../services/ProblemService";
-import { Package, ProblemInfor } from "../../models/package";
 
 const PackageTag = ({ content }: { content: string }) => {
     return (

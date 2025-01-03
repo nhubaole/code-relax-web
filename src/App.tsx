@@ -20,6 +20,7 @@ import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
 import { UserProvider } from "./context/UserContext";
 import Profile from "./components/profile/Profile";
+import Leaderboard from "./components/leaderboard/Leaderboard";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,10 +52,12 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/problems" element={<Problems />} />
-          <Route path="/workspace" element={<Workspace/>} />
+          <Route path="/workspace" element={<Workspace/>} /> 
+          <Route path="/detailexplore/:id" element={<DetailExplore isLoggedIn />} />
+
           <Route
             path="/explore"
-            element={<Profile onLogoutSuccess={handleLogoutSuccess} />}
+            element={<Explore />}
           />
           <Route
             path="/login"
@@ -67,7 +70,7 @@ function App() {
           />
            <Route path="/" element={<Home isLoggedIn/>} />
         {/* <Route path="/community" element={<Community />} /> */}
-        {/* <Route path="/leaderboard" element={<Leaderboard />} /> */}
+        <Route path="/leaderboard" element={<Leaderboard />} />
         </Routes>
         {(location.pathname !== "/workspace" && location.pathname !== "/admin") && (
           <div className="absolute top-0 left-0 w-full">
