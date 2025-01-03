@@ -5,31 +5,50 @@ import PasswordInput from "./InputPassword";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useUser } from "../../context/UserContext";
+import { Spin } from "antd";
+import { useAppStore } from "../../store";
+import { useCookies } from "react-cookie";
 interface LogInProps {
   onLoginSuccess: () => void;
 }
 
 const LogIn: React.FC<LogInProps> = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
-  const { setCurrentUser } = useUser(); 
+  const [, setCookie] = useCookies(["token"]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { setUserInfo } = useAppStore();
 
   const handleLogIn = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!email || !password) {
+      toast.error("Please enter email or password !");
+      return false;
+    }
     const logInData = { email, password };
-
+    const  userService = new UserService();
+    setLoading(true);
     try {
-      await UserService.logIn(logInData);
-      const user = await UserService.getCurrentUser();
-      setCurrentUser(user);
+      const res = await userService.logIn(logInData);
+      const token = res.data.data.token
+      setCookie("token", token, { path: "/" });
+      const user = await userService.getCurrentUser(token);
+      setUserInfo(user);
+      toast.success("Login successfully !")
       onLoginSuccess(); 
-      navigate('/'); 
+
+      if(user.role === 1) {
+        navigate('/admin')
+      } else {
+        navigate('/'); 
+      }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error('Login failed! Incorrect email or password.', { position: 'top-right', autoClose: 1500 });
+      toast.error('Login failed! Incorrect email or password.');
+    }finally {
+      setLoading(false); 
     }
   };
 
@@ -63,7 +82,7 @@ const LogIn: React.FC<LogInProps> = ({ onLoginSuccess }) => {
                 <button
                     type="submit"
                     onClick={handleLogIn}
-                    className="w-full py-2 text-[#FFFFFF] transition duration-200 bg-green-600 rounded-md hover:bg-green-500">Log In
+                    className="w-full py-2 text-[#FFFFFF] transition duration-200 bg-green-600 rounded-md hover:bg-green-500"> {loading ? <Spin /> : "Đăng nhập"}
                 </button>
               </form>
 

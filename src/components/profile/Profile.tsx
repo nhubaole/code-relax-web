@@ -9,19 +9,22 @@ import DivAccount from "./Account";
 import DivPoints from "./Points";
 import Footer from "./Footer";
 import PracticeHistory from "./PracticeHistory";
-import { useUser } from "../../context/UserContext";
 import UserService from "../../services/UserService";
 import { UserUpdateRe, UserUpdateReq } from "../../models/user";
+import { useCookies } from "react-cookie";
+import { useAppStore } from "../../store";
+import { customStorage } from "../../utils/localStorage";
 interface ProfileProps {
   onLogoutSuccess: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
-    const { currentUser, setCurrentUser } = useUser(); 
+  const {userInfo, setUserInfo, clearUserInfo} = useAppStore();
   const [activeDiv, setActiveDiv] = useState<"account" | "points" | "practice_history">("account");
-  const [selectedImage, setSelectedImage] = useState<File | string>(currentUser?.avatarUrl || ''); 
-  const [previewSrc, setPreviewSrc] = useState<string>(currentUser?.avatarUrl || '');
-  
+  const [selectedImage, setSelectedImage] = useState<File | string>(userInfo?.avatarUrl || ''); 
+  const [previewSrc, setPreviewSrc] = useState<string>(userInfo?.avatarUrl || '');
+  const [cookie, , removeCookie] = useCookies(["token"]);
+  const token = cookie.token
   const navigate = useNavigate();
   
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -60,13 +63,17 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
       avatar:  await handleAvatar(selectedImage),
   }; 
     console.log('update:',userUpdateReq);
-    await UserService.updateUser(userUpdateReq);
-    const updatedUser = await UserService.getCurrentUser();
-    setCurrentUser(updatedUser);      
+    const userService = new UserService();
+    await userService.updateUser(userUpdateReq, token);
+    const updatedUser = await userService.getCurrentUser(token);
+    setUserInfo (updatedUser);      
   };
 
 
   const handleLogout = () => {
+    removeCookie("token");
+    clearUserInfo();
+    customStorage.removeItem("currentUser");
     navigate("/");
     onLogoutSuccess();
   };
@@ -104,7 +111,7 @@ const Profile: React.FC<ProfileProps> = ({ onLogoutSuccess }) => {
           </div>
 
           <h2 className="text-3xl text-center text-[#FFFFFF] mb-10 mt-4">
-            {currentUser?.displayName}
+            {userInfo?.displayName}
           </h2>
 
           {/* Navigation Buttons */}

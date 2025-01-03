@@ -17,12 +17,14 @@ import { toast } from "react-toastify";
 import { Spin } from "antd";
 import SubmissionService from "../../../services/SubmissionService";
 import UserService from "../../../services/UserService";
+import { useCookies } from "react-cookie";
 
 type PlaygroundProps = {
   problem: ProblemRes;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   setSolved: React.Dispatch<React.SetStateAction<boolean>>;
   testCases: TestCase[];
+  onNewSubmission: () => void;
 };
 
 export interface ISettings {
@@ -39,7 +41,8 @@ const Playground = (prop: PlaygroundProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [fontSize] = useLocalStorage("lcc-fontSize", "14px");
-
+  const [cookie] = useCookies(["token"]);
+  const token = cookie.token
   const [settings, setSettings] = useState<ISettings>({
     fontSize: fontSize,
     settingsModalIsOpen: false,
@@ -51,7 +54,6 @@ const Playground = (prop: PlaygroundProps) => {
   const activeTestCase = testCasesRes.find(
     (testCase) => testCase.id === activeTestCaseId
   );
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (prop.problem) {
@@ -88,6 +90,7 @@ const Playground = (prop: PlaygroundProps) => {
   const handleSubmit = async () => {
     const problemService = new ProblemService();
     const submission = new SubmissionService();
+    const userService = new UserService();
 
     const req: SubmitReq = {
       problemID: prop.problem.id,
@@ -110,7 +113,7 @@ const Playground = (prop: PlaygroundProps) => {
       }
 
       try {
-        const user = await UserService.getCurrentUser();
+        const user = await userService.getCurrentUser(token);
 
         if (user) {
           await submission.createSubmission(
@@ -121,6 +124,9 @@ const Playground = (prop: PlaygroundProps) => {
             submissionStatus,
             data.data.output
           );
+
+        prop.onNewSubmission();
+
         }
       } catch (error) {
         console.error("Error fetching getCurrentUser:", error);

@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import avatar from "../../assets/avatar.jpg";
 import { useUser } from "../../context/UserContext";
+import { useAppStore } from "../../store";
+import { USER_DEFAULT_AVATAR } from "../../utils/constants";
 
 interface NavbarProps {
   isLoggedIn: boolean;
 }
 function Navbar(props: NavbarProps) {
-  const { currentUser } = useUser(); 
+  const { userInfo } = useAppStore(); 
 
   const currentPath = location.pathname;
   const currentActiveButton =
@@ -60,7 +62,7 @@ function Navbar(props: NavbarProps) {
         >
           Explore
         </Link>
-        <Link
+        {/* <Link
           to="/"
           className={`hover:text-green-600 ${
             location.pathname === "/community"
@@ -69,7 +71,7 @@ function Navbar(props: NavbarProps) {
           }`}
         >
           Community
-        </Link>
+        </Link> */}
         <Link
           to="/leaderboard"
           className={`hover:text-green-600 ${
@@ -89,9 +91,9 @@ function Navbar(props: NavbarProps) {
               className="flex items-center space-x-4"
               onClick={handleProfileClick}
             >              
-              <span className="font-medium text-[#FFFFFF]">{currentUser?.displayName || "Loading..."}</span>
+              <span className="font-medium text-[#FFFFFF]">{userInfo?.displayName || "Anonymous"}</span>
               <img
-                src={currentUser?.avatarUrl}
+                src={userInfo?.avatarUrl || USER_DEFAULT_AVATAR}
                 alt="User Avatar"
                 className="w-10 h-10 rounded-full"
               />

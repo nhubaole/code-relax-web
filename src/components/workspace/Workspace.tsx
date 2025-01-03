@@ -13,6 +13,7 @@ import { SubmissionRes } from "../../models/submission";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spin } from "antd";
 import UserService from "../../services/UserService";
+import { useCookies } from "react-cookie";
 
 // type WorkspaceProps = {
 //   problemId: number;
@@ -28,13 +29,20 @@ const Workspace = () => {
   const [submissions, setSubmissions] = useState<SubmissionRes[]>([]);
   const [tab, setTab] = useState("description");
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionRes>();
-  const token = localStorage.getItem('token');
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
   const location = useLocation();
   const problemId = location.state || {};
+  const [reloadSubmissions, setReloadSubmissions] = useState(false);
 
 
   const handleTabChange = (newTab: string) => {
     setTab(newTab);
+  };
+
+  const handleNewSubmission = () => {
+    // Set `reloadSubmissions` to trigger re-fetch
+    setReloadSubmissions((prev) => !prev);
   };
 
   useEffect(() => {
@@ -59,8 +67,9 @@ const Workspace = () => {
     };
 
     const fetchSubmission = async () => {
+      const userService = new UserService();
       try {
-        const user = await UserService.getCurrentUser();
+        const user = await userService.getCurrentUser(token);
         if (user) {
           const submissionService = new SubmissionService();
           const response = await submissionService.getByProblemAndUserID(user.id, problemId.problemId);
@@ -75,7 +84,7 @@ const Workspace = () => {
     fetchProblem();
     fetchTestCase();
     fetchSubmission();
-  }, [problemId.problemId]);
+  }, [problemId.problemId, reloadSubmissions]);
 
   const handleSubmissionClick = (submission: SubmissionRes) => {
     setSelectedSubmission(submission);
@@ -145,6 +154,7 @@ const Workspace = () => {
                 problem={problem}
                 setSuccess={setSuccess}
                 setSolved={setSolved}
+                onNewSubmission={handleNewSubmission}
               />
             ) : (
               <p>Loading...</p>

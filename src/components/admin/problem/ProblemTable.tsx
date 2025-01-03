@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { formatDateTime } from "../../../utils/formatter";
 import { Dropdown, Menu } from "antd";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { useCookies } from "react-cookie";
 
 type Problem = {
   title: string;
@@ -13,10 +14,14 @@ type Problem = {
   createdAt: string;
 };
 
-
-const ProblemTable = () => {
+type ProblemTableProps = {
+  searchKeyword: string; // Thêm prop từ khóa tìm kiếm
+};
+const ProblemTable = ({ searchKeyword }: ProblemTableProps) => {
   const [problems, setProblems] = useState<Problem[]>([])
-  const token = localStorage.getItem('token');
+  const [filteredProblems, setFilteredProblems] = useState<Problem[]>([]);
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
   useEffect(()=>{
     const fetchProblems = async () => {
       try{
@@ -33,6 +38,18 @@ const ProblemTable = () => {
     fetchProblems();
   }
   ,[])
+
+  useEffect(() => {
+    // Lọc bài toán dựa trên từ khóa tìm kiếm
+    const filtered = problems.filter(
+      (problem) =>
+        problem.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        problem.tag.some((tag) =>
+          tag.toLowerCase().includes(searchKeyword.toLowerCase())
+        )
+    );
+    setFilteredProblems(filtered);
+  }, [searchKeyword, problems]);
 
   const renderActionsMenu = () => (
     <Menu>
@@ -58,7 +75,7 @@ const ProblemTable = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-[#A2A1A833]">
-          {problems.map((problem, index) => (
+          {filteredProblems.map((problem, index) => (
             <tr
               key={index}
               className="hover:bg-gray-800 transition-colors duration-200"

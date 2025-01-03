@@ -4,17 +4,21 @@ import { ARTICLE_ENDPOINT, QUIZ_ENDPOINT } from "../utils/constants";
 
 export default  class ArticleService {
     constructor(){}
-    async getByID(id: number) {
+    async getByID(id: number, token: string| null) {
         const url = ARTICLE_ENDPOINT + `/${id}`;
         try {
-          const res = await apiClient.get(url)
+          const res = await apiClient.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+          })
           return res;
         } catch (error) {
           throw error;
         }
     }
 
-    async getAll(token: string| null) {
+    async getAll(token: string) {
       const url = ARTICLE_ENDPOINT;
       try {
         const res = await apiClient.get(url, {
@@ -26,7 +30,7 @@ export default  class ArticleService {
       } catch (error) {
         throw error;
       }
-  }
+    }
   async create(req: any, token: string| null) {
     const url = ARTICLE_ENDPOINT;
 
