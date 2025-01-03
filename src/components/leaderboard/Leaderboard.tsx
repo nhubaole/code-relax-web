@@ -120,7 +120,6 @@ interface LeaderboardProps {
   }
   
 const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
-    const { currentUser } = useUser(); 
     const [leaderBoard, setLeaderBoard] = useState<LeaderBoardReq | null>(null);
     const [cookie, , removeCookie] = useCookies(["token"]);
     const token = cookie.token  

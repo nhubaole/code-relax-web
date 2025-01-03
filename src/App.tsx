@@ -17,9 +17,7 @@ import Workspace from "./components/workspace/Workspace";
 import Admin from "./pages/admin";
 import { ToastContainer } from "react-toastify";
 import Explore from "./components/explore/Explore";
-import LeaderBoard from "./components/leaderboard/Leaderboard";
 import DetailExplore from "./components/explore/DetailExplore";
-import { UserProvider } from "./context/UserContext";
 import Profile from "./components/profile/Profile";
 import Leaderboard from "./components/leaderboard/Leaderboard";
 import { useAppStore } from "./store";
@@ -95,7 +93,7 @@ function App() {
     return (
       <>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home isLoggedIn />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/problems" element={<PrivateRoute><Problems /></PrivateRoute>} />
           <Route path="/workspace" element={<PrivateRoute><Workspace/></PrivateRoute>} /> 
@@ -116,7 +114,7 @@ function App() {
           />
            <Route path="/" element={<Home isLoggedIn/>} />
         {/* <Route path="/community" element={<Community />} /> */}
-        <Route path="/leaderboard" element={<PrivateRoute><Leaderboard /></PrivateRoute>} />
+        <Route path="/leaderboard" element={<PrivateRoute><Leaderboard isLoggedIn /></PrivateRoute>} />
         </Routes>
         {(location.pathname !== "/workspace" && location.pathname !== "/admin") && (
           <div className="absolute top-0 left-0 w-full">

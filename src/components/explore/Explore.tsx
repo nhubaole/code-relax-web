@@ -15,9 +15,13 @@ const Topic: React.FC<{
   return (
     <Link
       to={`/detailexplore/${id}`}
-      className=" bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40"
+      className=" bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col w-72 overflow-hidden border border-[#ffffff] border-opacity-40"
     >
-      <img className="w-full h-[170px] object-cover" src={cover} alt="Background" />
+      <img
+        className="w-full h-[170px] object-cover"
+        src={cover}
+        alt="Background"
+      />
       <p className="px-4 mt-4 font-medium text-left text-[#ffffff]">{name}</p>
       <p className="px-4 mt-3 mb-4 text-left text-sm text-[#ffffff]">
         {content}
@@ -53,7 +57,7 @@ const renderTopics = (startIndex: number, topics: ArticleGetAllReq[]) => {
 const Explore = () => {
   const [topics, setTopics] = useState<ArticleGetAllReq[]>([]);
   const [cookie, , removeCookie] = useCookies(["token"]);
-  const token = cookie.token
+  const token = cookie.token;
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -85,13 +89,12 @@ const Explore = () => {
         <div className="container p-6 overflow-x-auto ">
           <table className="w-full table-fixed border-spacing-4">
             <tr>
-            <td
-                  colSpan={2}
-                  className="relative p-4 text-center h-[320px] w-1/2"
-                >
-                  {topics.length > 0 && (
-                    <Link
-                    to={`/detailexplore/${topics[0].id}`}>
+              <td
+                colSpan={4}
+                className="relative p-4 text-center h-[320px] w-1/2"
+              >
+                {topics.length > 0 && (
+                  <Link to={`/detailexplore/${topics[0].id}`}>
                     <div className="relative h-[320px]">
                       <img
                         src={topics[0].cover}
@@ -107,13 +110,12 @@ const Explore = () => {
                       </p>
                     </div>
                   </Link>
-                  
-                  )}
-                </td>
-                {topics.slice(1, 3).map((topic, index) => (
+                )}
+              </td>
+              {topics.slice(1, 3).map((topic, index) => (
                 <td
                   key={index}
-                  className="p-4 text-center align-top justify-center"
+                  className="p-4 text-center  justify-center"
                 >
                   <Topic
                     id={topic.id}

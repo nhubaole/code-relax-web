@@ -15,7 +15,6 @@ const PracticeHistory = () => {
 
     const fetchSubmission = async () => {
       const submissionService = new SubmissionService();
-      const user = await UserService.getCurrentUser();
 
       const response = await submissionService.getByUserID(userInfo.id);
       const data = response.data;
@@ -24,7 +23,6 @@ const PracticeHistory = () => {
 
     const fetchStatistic = async () => {
       const submissionService = new SubmissionService();
-      const user = await UserService.getCurrentUser();
 
       const response = await submissionService.getStatisticByUserID(userInfo.id);
       const data = response.data;
