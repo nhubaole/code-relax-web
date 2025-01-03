@@ -15,7 +15,7 @@ const Topic: React.FC<{
   return (
     <Link
       to={`/detailexplore/${id}`}
-      className="w-[275px] h-[320px] bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40"
+      className=" bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40"
     >
       <img className="w-full h-[170px] object-cover" src={cover} alt="Background" />
       <p className="px-4 mt-4 font-medium text-left text-[#ffffff]">{name}</p>
@@ -85,23 +85,35 @@ const Explore = () => {
         <div className="container p-6 overflow-x-auto ">
           <table className="w-full table-fixed border-spacing-4">
             <tr>
-              <td
-                colSpan={2}
-                className="relative p-4 text-center h-[350px] w-1/2"
-              >
-                <img
-                  src={unsplash}
-                  alt="Background"
-                  className="w-full h-full"
-                />
-                <p className="absolute bottom-14 left-4 font-bold text-4xl text-left text-[#FFFFFF] p-4">
-                  All about Investing in NFTs and related risks
-                </p>
-              </td>
-              {topics.slice(0, 2).map((topic, index) => (
+            <td
+                  colSpan={2}
+                  className="relative p-4 text-center h-[320px] w-1/2"
+                >
+                  {topics.length > 0 && (
+                    <Link
+                    to={`/detailexplore/${topics[0].id}`}>
+                    <div className="relative h-[320px]">
+                      <img
+                        src={topics[0].cover}
+                        alt="Background"
+                        className="w-full h-full rounded-3xl object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black opacity-50 rounded-3xl"></div>
+                      <p className="absolute bottom-14 left-4 font-bold text-4xl text-left text-[#FFFFFF] p-4">
+                        {topics[0].title}
+                      </p>
+                      <p className="absolute bottom-6 left-4 text-xl text-left text-[#FFFFFF] p-4">
+                        {topics[0].summary}
+                      </p>
+                    </div>
+                  </Link>
+                  
+                  )}
+                </td>
+                {topics.slice(1, 3).map((topic, index) => (
                 <td
-                  key={`top-${index}`}
-                  className="w-1/4 p-4 text-center align-top"
+                  key={index}
+                  className="p-4 text-center align-top justify-center"
                 >
                   <Topic
                     id={topic.id}
@@ -112,7 +124,7 @@ const Explore = () => {
                 </td>
               ))}
             </tr>
-            {renderTopics(2, topics)}
+            {renderTopics(3, topics)}
           </table>
         </div>
       </div>

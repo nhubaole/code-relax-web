@@ -186,7 +186,6 @@ const DeatailExplore: React.FC<DeatailExploreProps> = (props) => {
                             onClick={() =>
                               !isSubmit && handleOptionClick(index, idx)
                             } // Dùng idx thay vì key
-                            disabled={isSubmit}
                           >
                             <label htmlFor={key} className="ml-2">
                               {value}

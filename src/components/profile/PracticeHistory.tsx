@@ -3,6 +3,7 @@ import { SubmissionRes, SubmissionStatisticRes } from "../../models/submission";
 import SubmissionService from "../../services/SubmissionService";
 import { formatDateTime } from "../../utils/formatter";
 import { useAppStore } from "../../store";
+import UserService from "../../services/UserService";
 
 const tags = ["Easy", "Medium", "Hard"];
 
@@ -11,8 +12,10 @@ const PracticeHistory = () => {
   const [statistic, setstatistic] = useState<SubmissionStatisticRes>();
   const {userInfo} = useAppStore();
   useEffect(() => {
+
     const fetchSubmission = async () => {
       const submissionService = new SubmissionService();
+      const user = await UserService.getCurrentUser();
 
       const response = await submissionService.getByUserID(userInfo.id);
       const data = response.data;
@@ -21,6 +24,7 @@ const PracticeHistory = () => {
 
     const fetchStatistic = async () => {
       const submissionService = new SubmissionService();
+      const user = await UserService.getCurrentUser();
 
       const response = await submissionService.getStatisticByUserID(userInfo.id);
       const data = response.data;
@@ -50,21 +54,20 @@ const PracticeHistory = () => {
                 className={`flex justify-between mr-2 px-3 w-28 py-1 rounded-full text-xs bg-gray font-semibold `}
               >
                 <div
-                  className={`${
-                    tag === "Easy"
-                      ? "text-green-600"
-                      : tag === "Medium"
+                  className={`${tag === "Easy"
+                    ? "text-green-600"
+                    : tag === "Medium"
                       ? "text-yellow-500"
                       : "text-red"
-                  }`}
+                    }`}
                 >
                   {tag}
                 </div>
                 <div className="text-green-700">{tag === "Easy"
-                      ? statistic.easyCount
-                      : tag === "Medium"
-                      ? statistic.mediumCount
-                      : statistic.hardCount}</div>
+                  ? statistic.easyCount
+                  : tag === "Medium"
+                    ? statistic.mediumCount
+                    : statistic.hardCount}</div>
               </div>
             ))}
           </div>
@@ -95,20 +98,18 @@ const PracticeHistory = () => {
             {submissions.map((entry, index) => (
               <div
                 key={index}
-                className={`flex items-center ${
-                  entry !== submissions[submissions.length - 1]
-                    ? "border-b"
-                    : ""
-                }  border-blacklight px-4 mx-5 py-5`}
+                className={`flex items-center ${entry !== submissions[submissions.length - 1]
+                  ? "border-b"
+                  : ""
+                  }  border-blacklight px-4 mx-5 py-5`}
               >
                 <div className="w-1/4">{formatDateTime(entry.createdAt)}</div>
                 <div className="w-1/4 text-yellow-300">
                   {entry.problem.title}
                 </div>
                 <div
-                  className={`w-1/4 font-medium ${
-                    entry.status === 0 ? "text-green-500" : "text-red"
-                  }`}
+                  className={`w-1/4 font-medium ${entry.status === 0 ? "text-green-500" : "text-red"
+                    }`}
                 >
                   {entry.status === 0 ? "ACCEPTED" : "WRONG ANSWER"}
                 </div>

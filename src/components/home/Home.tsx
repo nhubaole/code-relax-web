@@ -1,13 +1,26 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import home from "../../assets/home.png";
 import img1 from "../../assets/imghome_1.svg";
 import img2 from "../../assets/imghome_2.svg";
+import img3 from "../../assets/home3.png";
+import img4 from "../../assets/home4.png";
+import img5 from "../../assets/home5.png";
+import img6 from "../../assets/home6.png";
 
 interface HomeProps {
   isLoggedIn: boolean;
 }
 
 const Home: React.FC<HomeProps> = (props) => {
+  const navigate = useNavigate();
+
+  const handleNavigateToProblems = () => {
+    navigate('/problems')
+  }
+
+  const handleNavigateToExplore = () => {
+    navigate('/explore')
+  }
   return (
     <div className="relative">
       <img
@@ -30,14 +43,14 @@ const Home: React.FC<HomeProps> = (props) => {
           <div className="w-[400px] h-[550px] bg-[#FFFFFF] rounded-3xl shadow-2xl flex flex-col items-center overflow-hidden">
             <img
               className="object-cover w-full h-[290px]"
-              src={img1}
+              src={img6}
               alt="Background"
             />
             <h1 className="text-3xl text-center mt-14 text-textcolorlight"><strong>Live Compiler</strong></h1>
             <p className="px-10 mt-4 text-center text-textcolor">
               Our Live Compiler allows you to compile and run code quickly.
             </p>
-            <button 
+            <button onClick={handleNavigateToProblems}
               className="bg-black rounded-3xl text-[#FFFFFF] py-2.5 px-5 mt-8">
                 Start practicing now            
             </button>
@@ -53,9 +66,9 @@ const Home: React.FC<HomeProps> = (props) => {
             <p className="px-10 mt-4 text-center text-textcolor">
             You can exchange ideas, share code, or ask questions with the community.
             </p>
-            <button 
+            <button onClick={handleNavigateToExplore}
               className="bg-yellow-300 rounded-3xl text-black py-2.5 px-5 mt-8">
-                Start practicing now            
+                Explore now            
             </button>
           </div>
         </div>        
@@ -77,7 +90,7 @@ const Home: React.FC<HomeProps> = (props) => {
           <div className="w-[400px] h-[300px] bg-[#FFFFFF] rounded-3xl shadow-2xl flex flex-col items-center overflow-hidden">
             <img
               className="object-cover w-full h-full"
-              src={img1}
+              src={img3}
               alt="Background"
             />
           </div>
@@ -89,7 +102,7 @@ const Home: React.FC<HomeProps> = (props) => {
           <div className="w-[400px] h-[300px] bg-[#FFFFFF] rounded-3xl shadow-2xl flex flex-col items-center overflow-hidden">
             <img
               className="object-cover w-full h-full"
-              src={img1}
+              src={img4}
               alt="Background"
             />
           </div>
@@ -111,7 +124,7 @@ const Home: React.FC<HomeProps> = (props) => {
           <div className="w-[400px] h-[300px] bg-[#FFFFFF] rounded-3xl shadow-2xl flex flex-col items-center overflow-hidden">
             <img
               className="object-cover w-full h-full"
-              src={img1}
+              src={img5}
               alt="Background"
             />
           </div>

@@ -23,6 +23,7 @@ import RatingService from "../../../services/RatingService";
 import { USER_DEFAULT_AVATAR } from "../../../utils/constants";
 import { Rate } from "antd";
 import { useCookies } from "react-cookie";
+import UserService from "../../../services/UserService";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -43,7 +44,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [newRating, setNewRating] = useState(0);
   const [rating, setRating] = useState<RatingRes[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  
+
 
   const [effects, setEffects] = useState({
     bold: false,
@@ -82,14 +83,14 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   }, []);
 
   useEffect(() => {
-    const fetchRating = async (id:number) => {
+    const fetchRating = async (id: number) => {
       const ratingService = new RatingService();
       const response = await ratingService.getByProblemID(id, token);
       const data = response.data.data;
       setRating(data);
     };
     fetchRating(prop.problem.id);
-  },[]);
+  }, []);
 
   const handleRatingChange = (value: number) => {
     setNewRating(value)
@@ -97,6 +98,8 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const handleCreateDiscussion = async () => {
     try {
       const discussionService = new DiscussionService();
+      const user = await UserService.getCurrentUser();
+      if (user == null) return
 
       let payload: any;
 
@@ -104,7 +107,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
         payload = {
           formFile: selectedImage,
           type: "image",
-          userID: 3,
+          userID: user.id,
           problemID: prop.problem.id,
         }
 
@@ -117,7 +120,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
           content: newDiscussion,
           formFile: null,
           type: "text",
-          userID: 3,
+          userID: user.id,
           problemID: prop.problem.id,
         };
       }
@@ -127,14 +130,14 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
         toast.success("Create successfully")
         setSelectedImage(null)
         const id = createResponse.data.data;
-        
+
         const getResponse = await discussionService.getByID(id);
         if (getResponse.status === 200) {
           const newDiscussionData = getResponse.data.data;
 
           setDiscussions((prevDiscussions) => [
-            ...prevDiscussions,
             newDiscussionData,
+            ...prevDiscussions,
           ]);
 
           setNewDiscussion("");
@@ -155,13 +158,15 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const handleCreateRating = async () => {
     try {
       const ratingService = new RatingService();
+      const user = await UserService.getCurrentUser();
+      if (user == null) return
 
       let payload = {
-          numberOfStar: newRating,
-          userID: 3,
-          problemID: prop.problem.id,
-        };
-      
+        numberOfStar: newRating,
+        userID: user.id,
+        problemID: prop.problem.id,
+      };
+
       const createResponse = await ratingService.create(payload, token);
 
       if (createResponse.status === 201) {
@@ -195,22 +200,70 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   };
 
   const maxRatingCount = Math.max(...Object.values(ratings.breakdown));
+
+  const handleInsertEffect = (effect: any) => {
+    const textarea = document.getElementById("discussion-textarea");
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    let effectWrapper = "";
+
+    switch (effect) {
+      case "bold":
+        effectWrapper = "**";
+        break;
+      case "italic":
+        effectWrapper = "_";
+        break;
+      case "code":
+        effectWrapper = "``";
+        break;
+      default:
+        break;
+    }
+
+    if (effectWrapper) {
+      const before = textarea.value.slice(0, start);
+      const after = textarea.value.slice(end);
+      const newValue = `${before}${effectWrapper}${effectWrapper}${after}`;
+
+      textarea.value = newValue;
+      textarea.setSelectionRange(start + effectWrapper.length, start + effectWrapper.length);
+      textarea.focus();
+
+      setNewDiscussion(newValue); // Cập nhật giá trị state nếu cần
+    }
+  };
+
+  const parseContent = (content) => {
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    const italicRegex = /_(.*?)_/g;
+    const codeRegex = /``(.*?)``/g;
+
+    let parsedContent = content
+      .replace(boldRegex, '<strong>$1</strong>')
+      .replace(italicRegex, '<em>$1</em>')
+      .replace(codeRegex, '<code class="bg-[#ffffff] bg-opacity-10 text-white p-1 rounded">$1</code>');
+
+    return parsedContent;
+  };
+
   return (
     <div className="bg-[#1E1E1E] rounded-lg ">
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
-          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
-            prop.tab === "description" ? "text-green-300" : "text-gray"
-          } cursor-pointer`}
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${prop.tab === "description" ? "text-green-300" : "text-gray"
+            } cursor-pointer`}
           onClick={() => prop.onTabChange("description")}
         >
           Description
         </div>
 
         <div
-          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
-            prop.tab === "submission" ? "text-green-300" : "text-gray"
-          } cursor-pointer`}
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${prop.tab === "submission" ? "text-green-300" : "text-gray"
+            } cursor-pointer`}
           onClick={() => prop.onTabChange("submission")}
         >
           Submission
@@ -242,16 +295,16 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
             </div>
             <div className="flex items-center mt-3">
               <div className="flex space-x-6  items-center cursor-pointer rounded  text-xl transition-colors duration-200 text-[#FFF]">
-              <Rate
-              className="text-yellow custom-rate"
-                onChange={(value) =>handleRatingChange(value)}
-              />
-               <button
-               onClick={handleCreateRating}
-                className=" text-white text-base underline rounded"
-              >
-                Rate
-              </button>
+                <Rate
+                  className="text-yellow custom-rate"
+                  onChange={(value) => handleRatingChange(value)}
+                />
+                <button
+                  onClick={handleCreateRating}
+                  className=" text-white text-base underline rounded"
+                >
+                  Rate
+                </button>
               </div>
             </div>
 
@@ -302,9 +355,8 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
               </div>
 
               <div
-                className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${
-                  isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
-                } cursor-pointer`}
+                className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
+                  } cursor-pointer`}
                 onClick={toggleDiscussion}
               >
                 <div className="flex items-center space-x-2 text-[#FFF]">
@@ -325,22 +377,16 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                   <div className="bg-black p-3 rounded-lg mb-4 text-gray">
                     <div className="flex items-center space-x-5 mb-2 text-[#fff]">
                       <BiBold
-                        className={`cursor-pointer ${
-                          effects.bold ? "text-green-500" : "text-[#fff]"
-                        }`}
-                        onClick={() => toggleEffect("bold")}
+                        className={`cursor-pointer ${effects.bold ? "text-green-500" : "text-[#fff]"}`}
+                        onClick={() => handleInsertEffect("bold")}
                       />
                       <BiItalic
-                        className={`cursor-pointer ${
-                          effects.italic ? "text-green-500" : "text-[#fff]"
-                        }`}
-                        onClick={() => toggleEffect("italic")}
+                        className={`cursor-pointer ${effects.italic ? "text-green-500" : "text-[#fff]"}`}
+                        onClick={() => handleInsertEffect("italic")}
                       />
                       <BiCode
-                        className={`cursor-pointer ${
-                          effects.code ? "text-green-500" : "text-[#fff]"
-                        }`}
-                        onClick={() => toggleEffect("code")}
+                        className={`cursor-pointer ${effects.code ? "text-green-500" : "text-[#fff]"}`}
+                        onClick={() => handleInsertEffect("code")}
                       />
                       <BiImageAdd
                         className={`cursor-pointer ${
@@ -349,15 +395,15 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                         onClick={() => toggleEffect("image")}
                       />
                       <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) =>
-                        setSelectedImage(e.target.files ? e.target.files[0] : null)
-                      }
-                    />
-                   
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          setSelectedImage(e.target.files ? e.target.files[0] : null)
+                        }
+                      />
+
                     </div>
                     {selectedImage && (
                       <div className="mt-4">
@@ -376,76 +422,62 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                     )}
                     {!selectedImage && (
                       <textarea
-                      placeholder="Aa"
-                      className="w-full bg-[#1E1E1E] text-gray-400 p-2 rounded-md outline-none resize-none"
-                      value={newDiscussion}
-                      onChange={(e) => {
-                        let content = e.target.value;
-
-                        if (effects.bold) {
-                          content = `**${content}**`; // Thêm hiệu ứng Bold
-                        }
-
-                        if (effects.italic) {
-                          content = `_${content}_`; // Thêm hiệu ứng Italic
-                        }
-
-                        if (effects.code) {
-                          content = `\`${content}\``; // Thêm hiệu ứng Code
-                        }
-
-                        setNewDiscussion(content);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          handleCreateDiscussion();
-                        }
-                      }}
-                    ></textarea>
+                        id="discussion-textarea"
+                        placeholder="Aa"
+                        className="w-full bg-[#1E1E1E] text-gray-400 p-2 rounded-md outline-none resize-none"
+                        value={newDiscussion}
+                        onChange={(e) => setNewDiscussion(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleCreateDiscussion();
+                          }
+                        }}
+                      ></textarea>
                     )}
                   </div>
                   {discussions.map((discussion) => (
-                  <div
-                    key={discussion.id}
-                    className="flex justify-between items-center space-x-4 my-4"
-                  >
-                    <div className="flex items-start space-x-4 my-4">
-                      <img
-                        src={discussion.user?.avatarUrl || USER_DEFAULT_AVATAR}
-                        alt="User"
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div className="text-gray">
-                        <p className="font-bold text-[#fff]">
-                          {discussion.user?.displayName || "Anonymous"}
-                        </p>
-                        {discussion.type === "image" ? (
-                          <div className="mt-2">
-                            <img
-                              src={discussion.imageContent || ""}
-                              alt="Discussion"
-                              className="w-52 max-w-sm rounded-lg cursor-pointer"
-                              onClick={() => window.open(discussion.imageContent, "_blank")}
-                            />
-                          </div>
-                        ) : (
-                          <p>{discussion.content}</p>
-                        )}
+                    <div
+                      key={discussion.id}
+                      className="flex justify-between items-center space-x-4 my-4"
+                    >
+                      <div className="flex items-start space-x-4 my-4">
+                        <img
+                          src={discussion.user?.avatarUrl || USER_DEFAULT_AVATAR}
+                          alt="User"
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <div className="text-gray">
+                          <p className="font-bold text-[#fff]">
+                            {discussion.user?.displayName || "Anonymous"}
+                          </p>
+                          {discussion.type === "image" ? (
+                            <div className="mt-2">
+                              <img
+                                src={discussion.imageContent || ""}
+                                alt="Discussion"
+                                className="w-52 max-w-sm rounded-lg cursor-pointer"
+                                onClick={() => window.open(discussion.imageContent, "_blank")}
+                              />
+                            </div>
+                          ) : (
+                            <p
+                              dangerouslySetInnerHTML={{ __html: parseContent(discussion.content) }}
+                            ></p>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="text-[white]">{formatDateTime(discussion.createdAt)}</div>
-                  </div>
-                ))}
+                      <div className="text-[white]">{formatDateTime(discussion.createdAt)}</div>
+                    </div>
+                  ))}
 
                 </div>
               )}
 
               <div
-                className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${
-                  isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
-                } cursor-pointer`}
+                className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
+                  } cursor-pointer`}
                 onClick={toggleRatings}
               >
                 <div className="flex items-center space-x-2">

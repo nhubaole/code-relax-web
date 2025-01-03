@@ -3,7 +3,7 @@ export interface Package {
     content: string; 
     updatedAt: Date; 
     updatedAgo: string; 
-    numberParticipants: number; 
+    numberProblem: number; 
     levels: string[]; 
     icon: string;
     color: string;

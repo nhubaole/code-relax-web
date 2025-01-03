@@ -70,7 +70,7 @@ const DivPackage: React.FC <{
 
             <div className="flex flex-none mt-auto mb-0">
                 <span className="text-3xl mt-auto text-left text-[#FFFFFF]">{numberParticipants}</span>
-                <span className="mt-auto mb-1 px-1 text-xs text-left text-[#FFFFFF]">participants</span>
+                <span className="mt-auto mb-1 px-1 text-xs text-left text-[#FFFFFF]">problems</span>
             </div>
         </button>
     );
@@ -301,7 +301,7 @@ const Problems = () => {
                                 key={index}
                                 content={pkg.content}
                                 updateAgo = {pkg.updatedAgo}
-                                numberParticipants={pkg.numberParticipants}
+                                numberParticipants={pkg.numberProblem}
                                 levels={pkg.levels}
                                 icon={icons[index % icons.length]} 
                                 color={colors[index % colors.length]}
