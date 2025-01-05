@@ -67,10 +67,9 @@ export default class UserService {
     }
   }
 
-  static async getLeaderBoard() {
+  async getLeaderBoard(token:string) {
     const url = USER_ENDPOINT + '/LeaderBoard'; 
     try {
-      const token = localStorage.getItem('token'); 
       const res = await apiClient.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`, 

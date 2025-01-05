@@ -7,7 +7,7 @@ import { useState } from "react";
 const AllProblemPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   return (
-    <div className="h-screen overflow-hidden text-[white]">
+    <div className=" text-[white]">
       <SearchBar onSearch={setSearchKeyword}/>
       <ProblemTable searchKeyword={searchKeyword}/>
       {/* <Pagination className="text-gray" /> */}

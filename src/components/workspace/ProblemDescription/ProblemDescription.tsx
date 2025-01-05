@@ -22,7 +22,9 @@ import { RatingRes } from "../../../models/rating";
 import RatingService from "../../../services/RatingService";
 import { USER_DEFAULT_AVATAR } from "../../../utils/constants";
 import { Rate } from "antd";
+import { useCookies } from "react-cookie";
 import UserService from "../../../services/UserService";
+import { useAppStore } from "../../../store";
 type ProblemDescriptionProps = {
   testCases: TestCase[];
   problem: ProblemRes;
@@ -34,7 +36,8 @@ type ProblemDescriptionProps = {
 const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [isRatingsOpen, setIsRatingsOpen] = useState(false);
-  const token = localStorage.getItem('token');
+  const [cookie] = useCookies(["token"]);
+  const token = cookie.token;
   const toggleDiscussion = () => setIsDiscussionOpen(!isDiscussionOpen);
   const toggleRatings = () => setIsRatingsOpen(!isRatingsOpen);
   const [discussions, setDiscussions] = useState<DiscussionRes[]>([]);
@@ -42,7 +45,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const [newRating, setNewRating] = useState(0);
   const [rating, setRating] = useState<RatingRes[]>([]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-
+  const { userInfo } = useAppStore();
 
   const [effects, setEffects] = useState({
     bold: false,
@@ -50,7 +53,6 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     code: false,
     image: false,
   });
-
 
   const toggleEffect = (effect: keyof typeof effects) => {
     if (effect === "image") {
@@ -62,7 +64,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       }));
     }
   };
-  console.log(selectedImage)
+  console.log(selectedImage);
 
   const testCasesRes = testCaseFormatter(prop.testCases);
   const acceptanceRate =
@@ -73,7 +75,10 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   useEffect(() => {
     const fetchdiscussion = async () => {
       const discussionService = new DiscussionService();
-      const response = await discussionService.getByProblemID(prop.problem.id, token);
+      const response = await discussionService.getByProblemID(
+        prop.problem.id,
+        token
+      );
       const data = response.data.data;
       setDiscussions(data);
     };
@@ -91,13 +96,11 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   }, []);
 
   const handleRatingChange = (value: number) => {
-    setNewRating(value)
+    setNewRating(value);
   };
   const handleCreateDiscussion = async () => {
     try {
       const discussionService = new DiscussionService();
-      const user = await UserService.getCurrentUser();
-      if (user == null) return
 
       let payload: any;
 
@@ -105,10 +108,9 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
         payload = {
           formFile: selectedImage,
           type: "image",
-          userID: user.id,
+          userID: userInfo.id,
           problemID: prop.problem.id,
-        }
-
+        };
       } else {
         if (!newDiscussion.trim()) {
           toast.error("Discussion content cannot be empty!");
@@ -118,15 +120,15 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
           content: newDiscussion,
           formFile: null,
           type: "text",
-          userID: user.id,
+          userID: userInfo.id,
           problemID: prop.problem.id,
         };
       }
       const createResponse = await discussionService.create(payload, token);
 
       if (createResponse.status === 201) {
-        toast.success("Create successfully")
-        setSelectedImage(null)
+        toast.success("Create successfully");
+        setSelectedImage(null);
         const id = createResponse.data.data;
 
         const getResponse = await discussionService.getByID(id);
@@ -135,7 +137,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
           setDiscussions((prevDiscussions) => [
             newDiscussionData,
-            ...prevDiscussions,
+            ...(prevDiscussions || []),
           ]);
 
           setNewDiscussion("");
@@ -156,32 +158,41 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
   const handleCreateRating = async () => {
     try {
       const ratingService = new RatingService();
-      const user = await UserService.getCurrentUser();
-      if (user == null) return
 
       let payload = {
         numberOfStar: newRating,
-        userID: user.id,
+        userID: userInfo.id,
         problemID: prop.problem.id,
       };
 
       const createResponse = await ratingService.create(payload, token);
 
       if (createResponse.status === 201) {
-        toast.success("Create successfully")
-        setSelectedImage(null)
+        toast.success("Create successfully");
+        setSelectedImage(null);
+        const response = await ratingService.getByProblemID(
+          prop.problem.id,
+          token
+        );
+        if (response.status === 200) {
+          const data = response.data.data;
+          setRating(data);
+        } else {
+          toast.error("Failed to fetch updated ratings. Please try again.");
+        }
       } else {
         toast.error("Failed to create discussion. Please try again.");
       }
     } catch (error) {
       console.error("Error creating discussion:", error);
       toast.error(
-        "Error occurred while creating discussion. Please try again."
+        "You are already rated this problem. Please try again with another problem."
       );
     }
   };
   console.log(newRating);
-  const totalStars = rating?.reduce((acc, curr) => acc + curr.numberOfStar, 0) || 0;
+  const totalStars =
+    rating?.reduce((acc, curr) => acc + curr.numberOfStar, 0) || 0;
   const totalReviews = rating?.length || 0;
   const overall = totalReviews === 0 ? 0 : totalStars / totalReviews || 0;
 
@@ -228,7 +239,10 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       const newValue = `${before}${effectWrapper}${effectWrapper}${after}`;
 
       textarea.value = newValue;
-      textarea.setSelectionRange(start + effectWrapper.length, start + effectWrapper.length);
+      textarea.setSelectionRange(
+        start + effectWrapper.length,
+        start + effectWrapper.length
+      );
       textarea.focus();
 
       setNewDiscussion(newValue); // Cập nhật giá trị state nếu cần
@@ -241,9 +255,12 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     const codeRegex = /``(.*?)``/g;
 
     let parsedContent = content
-      .replace(boldRegex, '<strong>$1</strong>')
-      .replace(italicRegex, '<em>$1</em>')
-      .replace(codeRegex, '<code class="bg-[#ffffff] bg-opacity-10 text-white p-1 rounded">$1</code>');
+      .replace(boldRegex, "<strong>$1</strong>")
+      .replace(italicRegex, "<em>$1</em>")
+      .replace(
+        codeRegex,
+        '<code class="bg-[#ffffff] bg-opacity-10 text-white p-1 rounded">$1</code>'
+      );
 
     return parsedContent;
   };
@@ -252,16 +269,18 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
     <div className="bg-[#1E1E1E] rounded-lg ">
       <div className="flex h-11 w-full bg-blacklight items-center rounded-t-lg pt-2 text-[#FFF]">
         <div
-          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${prop.tab === "description" ? "text-green-300" : "text-gray"
-            } cursor-pointer`}
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "description" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
           onClick={() => prop.onTabChange("description")}
         >
           Description
         </div>
 
         <div
-          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${prop.tab === "submission" ? "text-green-300" : "text-gray"
-            } cursor-pointer`}
+          className={`rounded-t-[5px] px-5 py-[10px] text-base font-bold ${
+            prop.tab === "submission" ? "text-green-300" : "text-gray"
+          } cursor-pointer`}
           onClick={() => prop.onTabChange("submission")}
         >
           Submission
@@ -353,8 +372,9 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
               </div>
 
               <div
-                className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
-                  } cursor-pointer`}
+                className={`flex mt-4 items-center justify-between p-4 bg-blacklight rounded-t-xl ${
+                  isDiscussionOpen ? "rounded-b-none" : "rounded-b-xl"
+                } cursor-pointer`}
                 onClick={toggleDiscussion}
               >
                 <div className="flex items-center space-x-2 text-[#FFF]">
@@ -375,15 +395,21 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                   <div className="bg-black p-3 rounded-lg mb-4 text-gray">
                     <div className="flex items-center space-x-5 mb-2 text-[#fff]">
                       <BiBold
-                        className={`cursor-pointer ${effects.bold ? "text-green-500" : "text-[#fff]"}`}
+                        className={`cursor-pointer ${
+                          effects.bold ? "text-green-500" : "text-[#fff]"
+                        }`}
                         onClick={() => handleInsertEffect("bold")}
                       />
                       <BiItalic
-                        className={`cursor-pointer ${effects.italic ? "text-green-500" : "text-[#fff]"}`}
+                        className={`cursor-pointer ${
+                          effects.italic ? "text-green-500" : "text-[#fff]"
+                        }`}
                         onClick={() => handleInsertEffect("italic")}
                       />
                       <BiCode
-                        className={`cursor-pointer ${effects.code ? "text-green-500" : "text-[#fff]"}`}
+                        className={`cursor-pointer ${
+                          effects.code ? "text-green-500" : "text-[#fff]"
+                        }`}
                         onClick={() => handleInsertEffect("code")}
                       />
                       <BiImageAdd
@@ -398,10 +424,11 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                         accept="image/*"
                         className="hidden"
                         onChange={(e) =>
-                          setSelectedImage(e.target.files ? e.target.files[0] : null)
+                          setSelectedImage(
+                            e.target.files ? e.target.files[0] : null
+                          )
                         }
                       />
-
                     </div>
                     {selectedImage && (
                       <div className="mt-4">
@@ -434,14 +461,16 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                       ></textarea>
                     )}
                   </div>
-                  {discussions.map((discussion) => (
+                  {discussions?.map((discussion) => (
                     <div
                       key={discussion.id}
                       className="flex justify-between items-center space-x-4 my-4"
                     >
                       <div className="flex items-start space-x-4 my-4">
                         <img
-                          src={discussion.user?.avatarUrl || USER_DEFAULT_AVATAR}
+                          src={
+                            discussion.user?.avatarUrl || USER_DEFAULT_AVATAR
+                          }
                           alt="User"
                           className="w-8 h-8 rounded-full object-cover"
                         />
@@ -455,27 +484,33 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
                                 src={discussion.imageContent || ""}
                                 alt="Discussion"
                                 className="w-52 max-w-sm rounded-lg cursor-pointer"
-                                onClick={() => window.open(discussion.imageContent, "_blank")}
+                                onClick={() =>
+                                  window.open(discussion.imageContent, "_blank")
+                                }
                               />
                             </div>
                           ) : (
                             <p
-                              dangerouslySetInnerHTML={{ __html: parseContent(discussion.content) }}
+                              dangerouslySetInnerHTML={{
+                                __html: parseContent(discussion.content),
+                              }}
                             ></p>
                           )}
                         </div>
                       </div>
 
-                      <div className="text-[white]">{formatDateTime(discussion.createdAt)}</div>
+                      <div className="text-[white]">
+                        {formatDateTime(discussion.createdAt)}
+                      </div>
                     </div>
                   ))}
-
                 </div>
               )}
 
               <div
-                className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
-                  } cursor-pointer`}
+                className={`flex items-center mt-4 justify-between p-4 bg-blacklight rounded-t-xl ${
+                  isRatingsOpen ? "rounded-b-none" : "rounded-b-xl"
+                } cursor-pointer`}
                 onClick={toggleRatings}
               >
                 <div className="flex items-center space-x-2">

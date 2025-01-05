@@ -4,6 +4,7 @@ import arrange from "../../assets/arrange.svg"
 import { LeaderBoardReq } from '../../models/user';
 import UserService from "../../services/UserService";
 import { useUser } from "../../context/UserContext";
+import { useCookies } from "react-cookie";
 
 const Top: React.FC <{
     name: string; 
@@ -82,7 +83,8 @@ const Leaderboard: React.FC <{
     userAvatar: string;
     submission: number; 
     solved: number;
-    acceptance: number;  }> = ({ rank, userName, userAvatar, submission, solved, acceptance }) => {    
+    acceptance: number;  }> = ({ rank, userName, userAvatar, submission, solved, acceptance }) => {  
+    
     return (
         <div className="flex w-full px-2 py-2 border-b border-blacklight">
             <div className="flex flex-1">
@@ -118,12 +120,14 @@ interface LeaderboardProps {
   }
   
 const LeaderBoard: React.FC<LeaderboardProps> = (props) => {
-    const { currentUser } = useUser(); 
     const [leaderBoard, setLeaderBoard] = useState<LeaderBoardReq | null>(null);
-
+    const [cookie, , removeCookie] = useCookies(["token"]);
+    const token = cookie.token  
+    
     const getLeaderBoard = async () => {
+    const userService = new UserService();
       try {
-      const lb = await UserService.getLeaderBoard();
+      const lb = await userService.getLeaderBoard(token);
       setLeaderBoard(lb); 
       } catch (error) {
       console.error("Failed to fetch current user:", error);

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArticleGetAllReq } from "../../models/article";
 import { useEffect, useState } from "react";
 import ArticleService from "../../services/ArticleService";
+import { useCookies } from "react-cookie";
 
 const Topic: React.FC<{
   id: number;
@@ -14,9 +15,13 @@ const Topic: React.FC<{
   return (
     <Link
       to={`/detailexplore/${id}`}
-      className=" bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col overflow-hidden border border-[#ffffff] border-opacity-40"
+      className=" bg-[#ffffff] bg-opacity-20 rounded-3xl flex flex-col w-72 overflow-hidden border border-[#ffffff] border-opacity-40"
     >
-      <img className="w-full h-[170px] object-cover" src={cover} alt="Background" />
+      <img
+        className="w-full h-[170px] object-cover"
+        src={cover}
+        alt="Background"
+      />
       <p className="px-4 mt-4 font-medium text-left text-[#ffffff]">{name}</p>
       <p className="px-4 mt-3 mb-4 text-left text-sm text-[#ffffff]">
         {content}
@@ -29,21 +34,21 @@ const renderTopics = (startIndex: number, topics: ArticleGetAllReq[]) => {
   const rows = [];
   for (let i = startIndex; i < topics.length; i += 4) {
     rows.push(
-      <tr key={i}>
+      <div key={i} className="flex space-x-10">
         {topics.slice(i, i + 4).map((topic, index) => (
-          <td key={index} className="w-1/4 p-4 text-center align-top">
+          <div className="w-72">
             <Topic
               id={topic.id}
               name={topic.title}
               content={topic.summary}
               cover={topic.cover}
             />
-          </td>
+          </div>
         ))}
         {[...Array(4 - (topics.length % 4))].map((_, index) => (
-          <td key={`empty-${index}`} className="p-4 text-center"></td>
+          <div key={`empty-${index}`} className="p-4 text-center"></div>
         ))}
-      </tr>
+      </div>
     );
   }
   return rows;
@@ -51,7 +56,8 @@ const renderTopics = (startIndex: number, topics: ArticleGetAllReq[]) => {
 
 const Explore = () => {
   const [topics, setTopics] = useState<ArticleGetAllReq[]>([]);
-  const token = localStorage.getItem("token");
+  const [cookie, , removeCookie] = useCookies(["token"]);
+  const token = cookie.token;
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -83,13 +89,12 @@ const Explore = () => {
         <div className="container p-6 overflow-x-auto ">
           <table className="w-full table-fixed border-spacing-4">
             <tr>
-            <td
-                  colSpan={2}
-                  className="relative p-4 text-center h-[320px] w-1/2"
-                >
-                  {topics.length > 0 && (
-                    <Link
-                    to={`/detailexplore/${topics[0].id}`}>
+              <td
+                colSpan={4}
+                className="relative p-4 text-center h-[320px] w-1/2"
+              >
+                {topics.length > 0 && (
+                  <Link to={`/detailexplore/${topics[0].id}`}>
                     <div className="relative h-[320px]">
                       <img
                         src={topics[0].cover}
@@ -105,14 +110,10 @@ const Explore = () => {
                       </p>
                     </div>
                   </Link>
-                  
-                  )}
-                </td>
-                {topics.slice(1, 3).map((topic, index) => (
-                <td
-                  key={index}
-                  className="p-4 text-center align-top justify-center"
-                >
+                )}
+              </td>
+              {topics.slice(1, 3).map((topic, index) => (
+                <td key={index} className="p-4 text-center  justify-center">
                   <Topic
                     id={topic.id}
                     name={topic.title}

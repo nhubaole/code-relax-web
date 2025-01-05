@@ -5,6 +5,7 @@ import TagService from "../../../../services/TagService";
 import { toast } from "react-toastify";
 import ProblemService from "../../../../services/ProblemService";
 import { CreateProblemReq } from "../../../../models/problem";
+import { useCookies } from "react-cookie";
 
 const { Option } = Select;
 
@@ -26,6 +27,8 @@ const CreateProblemForm: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [inputJson, setInputJson] = useState<string[]>([]);
   const [outputJson, setOutputJson] = useState<string[]>([]); 
+  const [cookie] = useCookies(["token"]);
+  const token = cookie.token
 
   
   const handlePrepareInputJson = () => {
@@ -84,7 +87,7 @@ const CreateProblemForm: React.FC = () => {
   
     const problemService = new ProblemService();
     try {
-      await problemService.createProblem(problemData);
+      await problemService.createProblem(problemData, token);
       toast.success("Problem created successfully!");
     } catch (error: any) {
       toast.error(error.message || "Failed to create problem.");
@@ -146,7 +149,7 @@ const CreateProblemForm: React.FC = () => {
         case "int":
           return `{"output": ${parseInt(value, 10)}}`;
         case "bool":
-          return `{output: ${value === "true"}}`;
+          return `{"output": ${value === "true"}}`;
         case "list<string>":
           if (Array.isArray(value)) {
             return `{"output": [${value.map((item) => `"${item}"`).join(", ")}]}`;
