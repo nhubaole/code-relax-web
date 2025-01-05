@@ -137,7 +137,7 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
 
           setDiscussions((prevDiscussions) => [
             newDiscussionData,
-            ...prevDiscussions,
+            ...(prevDiscussions || []),
           ]);
 
           setNewDiscussion("");
@@ -170,13 +170,23 @@ const ProblemDescription = (prop: ProblemDescriptionProps) => {
       if (createResponse.status === 201) {
         toast.success("Create successfully");
         setSelectedImage(null);
+        const response = await ratingService.getByProblemID(
+          prop.problem.id,
+          token
+        );
+        if (response.status === 200) {
+          const data = response.data.data;
+          setRating(data);
+        } else {
+          toast.error("Failed to fetch updated ratings. Please try again.");
+        }
       } else {
         toast.error("Failed to create discussion. Please try again.");
       }
     } catch (error) {
       console.error("Error creating discussion:", error);
       toast.error(
-        "Error occurred while creating discussion. Please try again."
+        "You are already rated this problem. Please try again with another problem."
       );
     }
   };

@@ -34,21 +34,21 @@ const renderTopics = (startIndex: number, topics: ArticleGetAllReq[]) => {
   const rows = [];
   for (let i = startIndex; i < topics.length; i += 4) {
     rows.push(
-      <tr key={i}>
+      <div key={i} className="flex space-x-10">
         {topics.slice(i, i + 4).map((topic, index) => (
-          <td key={index} className="w-1/4 p-4 text-center align-top">
+          <div className="w-72">
             <Topic
               id={topic.id}
               name={topic.title}
               content={topic.summary}
               cover={topic.cover}
             />
-          </td>
+          </div>
         ))}
         {[...Array(4 - (topics.length % 4))].map((_, index) => (
-          <td key={`empty-${index}`} className="p-4 text-center"></td>
+          <div key={`empty-${index}`} className="p-4 text-center"></div>
         ))}
-      </tr>
+      </div>
     );
   }
   return rows;
@@ -113,10 +113,7 @@ const Explore = () => {
                 )}
               </td>
               {topics.slice(1, 3).map((topic, index) => (
-                <td
-                  key={index}
-                  className="p-4 text-center  justify-center"
-                >
+                <td key={index} className="p-4 text-center  justify-center">
                   <Topic
                     id={topic.id}
                     name={topic.title}
